@@ -4,9 +4,7 @@ import com.semih.enums.CurrencyType;
 import com.semih.enums.DonationType;
 import com.semih.enums.PaymentMethod;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 
@@ -14,17 +12,9 @@ import java.math.BigDecimal;
 @Table(name="donation")
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 public class Donation extends BaseEntity {
-
-    @ManyToOne(cascade = {CascadeType.MERGE,CascadeType.REMOVE})
-    private Donor donor;
-
-    @ManyToOne(cascade = {CascadeType.MERGE,CascadeType.REMOVE})
-    private CharityOrganization charityOrganization;
-
-    @ManyToOne(cascade = CascadeType.ALL)
-    private Category category;
 
     @Enumerated(EnumType.STRING)
     private CurrencyType currency;
@@ -41,5 +31,13 @@ public class Donation extends BaseEntity {
     @Column(nullable = false)
     private BigDecimal amount;
 
+    @ManyToOne(cascade = {CascadeType.MERGE,CascadeType.REMOVE})
+    private Donor donor;
+
+    @ManyToOne(cascade = {CascadeType.MERGE,CascadeType.REMOVE})
+    private CharityOrganization charityOrganization;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    private Category category;
 
 }

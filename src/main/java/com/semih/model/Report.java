@@ -20,20 +20,20 @@ import java.util.Date;
 @Setter
 public class Report extends BaseEntity{
 
+    @Column(nullable = false)
     private String title;
 
+    @Column(nullable = false)
     private String description;
 
-    private BigDecimal total_income;
+    private BigDecimal totalIncome;
 
-    private BigDecimal total_expense;
+    private BigDecimal totalExpense;
 
-    private BigDecimal net_balance;
+    private BigDecimal netBalance;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") // JSON'da ISO formatı sağlar
     private LocalDate startingDate;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate endingDate;
 
     @ManyToOne

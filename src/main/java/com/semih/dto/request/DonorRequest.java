@@ -1,6 +1,5 @@
 package com.semih.dto.request;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,13 +9,15 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class FamilyRequest {
+public class DonorRequest {
 
-    private String familyName;
+    private String firstName;
 
-    private int familyMemberCount;
+    private String lastName;
 
     private String phoneNumber;
+
+    private String email;
 
     private AddressRequest address;
 }

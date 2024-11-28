@@ -1,7 +1,5 @@
 package com.semih.controller;
 
-import com.semih.dto.request.IncomeRequest;
-import com.semih.model.Income;
 import com.semih.service.IncomeService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

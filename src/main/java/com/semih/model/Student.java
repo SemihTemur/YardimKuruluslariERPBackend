@@ -18,14 +18,19 @@ import java.util.List;
 @AllArgsConstructor
 public class Student extends BaseEntity {
 
+    @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
     private String surname;
 
+    @Column(nullable = false)
     private int age;
 
+    @Column(unique = true, nullable = false)
     private String tckn;
 
+    @Column(unique = true, nullable = false)
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)

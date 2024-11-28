@@ -16,10 +16,12 @@ import java.util.List;
 @AllArgsConstructor
 public class Family extends BaseEntity {
 
+    @Column(unique = true, nullable = false)
     private String familyName;
 
     private int familyMemberCount;
 
+    @Column(unique = true, nullable = false)
     private String phoneNumber;
 
     @OneToOne(cascade = CascadeType.ALL)

@@ -19,6 +19,7 @@ import java.util.Date;
 @Setter
 public class Aid extends BaseEntity{
 
+    @Column(nullable = false)
     private BigDecimal aidAmount;
 
     @ManyToOne
@@ -27,10 +28,10 @@ public class Aid extends BaseEntity{
     @ManyToOne
     private Family family;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") // JSON'da ISO formatı sağlar
+    @Column(nullable = false)
     private LocalDate startingDate;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @Column(nullable = false)
     private LocalDate endingDate;
 
 }

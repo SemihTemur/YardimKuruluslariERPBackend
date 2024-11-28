@@ -9,7 +9,6 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Date;
 @Entity
 @Table(name="Income")
 @AllArgsConstructor
@@ -18,14 +17,14 @@ import java.util.Date;
 @Setter
 public class Income extends BaseEntity {
 
-    private BigDecimal amount; // Gelir miktarı
+    @Column(nullable = false)
+    private BigDecimal amount;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate income_date; // Gelirin kaydedildiği tarih
+    private LocalDate incomeDate;
 
-    private String description; // Gelir açıklaması
+    private String description;
 
     @ManyToOne
     @JoinColumn(name = "charity_organization_id")
-    private CharityOrganization charityOrganization; // Hangi derneğe ait olduğu
+    private CharityOrganization charityOrganization;
 }

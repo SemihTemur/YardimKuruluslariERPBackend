@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
 
@@ -18,10 +19,10 @@ import java.util.Date;
 @AllArgsConstructor
 public class Expense extends BaseEntity {
 
-    private Double amount; // Gider miktarı
+    @Column(nullable = false)
+    private BigDecimal amount; // Gider miktarı
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate expense_date; // Giderin kaydedildiği tarih
+    private LocalDate expenseDate; // Giderin kaydedildiği tarih
 
     private String description; // Gider açıklaması
 

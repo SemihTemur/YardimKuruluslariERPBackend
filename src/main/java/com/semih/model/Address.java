@@ -1,10 +1,7 @@
 package com.semih.model;
 
 import com.semih.enums.UserType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -15,12 +12,16 @@ import lombok.*;
 @Setter
 public class Address extends BaseEntity {
 
+    @Column(nullable = false)
     private String city;
 
+    @Column(nullable = false)
     private String district;
 
+    @Column(nullable = false)
     private String neighborhood;
 
+    @Column(nullable = false)
     private String street;
 
     @Enumerated(EnumType.STRING)

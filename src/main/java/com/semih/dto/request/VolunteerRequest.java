@@ -1,22 +1,22 @@
 package com.semih.dto.request;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
-public class FamilyRequest {
+@AllArgsConstructor
+@NoArgsConstructor
+public class VolunteerRequest {
 
-    private String familyName;
+    private String name;
 
-    private int familyMemberCount;
+    private String surname;
 
-    private String phoneNumber;
+    private String phone;
 
     private AddressRequest address;
+
 }

@@ -13,17 +13,18 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Getter
 @Setter
-public class AidRequest {
+public class ScholarshipRequest {
 
-    private BigDecimal aidAmount;
+    private BigDecimal scholarshipAmount;
 
-    private String organizationName;
+    private String charityOrganizationName;
 
-    private String familyName;
+    private String studentName;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") // JSON'da ISO formatı sağlar
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate startingDate;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate endingDate;
+
 }

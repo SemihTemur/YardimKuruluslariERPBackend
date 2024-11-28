@@ -16,14 +16,19 @@ import java.util.List;
 @AllArgsConstructor
 public class Volunteer extends BaseEntity{
 
+    @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
     private String surname;
 
+    @Column(unique = true, nullable = false)
     private String phone;
 
     @OneToOne(cascade = CascadeType.ALL)
     private Address address;
 
+    @OneToMany(mappedBy = "volunteer", cascade = {CascadeType.MERGE,CascadeType.REMOVE})
+    private List<EventVolunteer> eventVolunteers;
 
 }

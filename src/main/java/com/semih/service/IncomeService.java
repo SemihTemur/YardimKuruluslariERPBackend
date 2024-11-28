@@ -1,6 +1,5 @@
 package com.semih.service;
 
-import com.semih.dto.request.IncomeRequest;
 import com.semih.model.CharityOrganization;
 import com.semih.model.Income;
 import com.semih.repository.CharityOrganizationRepository;

@@ -19,6 +19,7 @@ import java.util.Date;
 @Setter
 public class Scholarship extends BaseEntity {
 
+    @Column(nullable = false)
     private BigDecimal scholarshipAmount;
 
     @ManyToOne(cascade = {CascadeType.MERGE,CascadeType.REMOVE})
@@ -27,10 +28,8 @@ public class Scholarship extends BaseEntity {
     @ManyToOne(cascade = {CascadeType.MERGE,CascadeType.REMOVE})
     private Student student;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") // JSON'da ISO formatı sağlar
     private LocalDate startingDate;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate endingDate;
 
 

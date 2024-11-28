@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
@@ -17,13 +18,22 @@ import java.util.List;
 public class CharityOrganization extends BaseEntity {
 
     @Column(unique = true, nullable = false)
-    private String organizationName;
+    private String charityOrganizationName;
 
     @Column(unique = true, nullable = false)
-    private String phoneNumber;
+    private String charityOrganizationPhoneNumber;
 
     @Column(unique = true, nullable = false)
-    private String email;
+    private String charityOrganizationEmail;
+
+    @Column(unique = true, nullable = false)
+    private String ownerName;
+
+    @Column(unique = true, nullable = false)
+    private String ownerTckn;
+
+    @Column(nullable = false)
+    private BigDecimal budget;
 
     @OneToOne(cascade = CascadeType.ALL)
     private Address address;

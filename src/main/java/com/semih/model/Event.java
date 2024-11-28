@@ -1,12 +1,14 @@
 package com.semih.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.semih.enums.CurrencyType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -18,21 +20,26 @@ import java.util.List;
 @AllArgsConstructor
 public class Event extends BaseEntity{
 
+    @Column(unique = true, nullable = false)
     private String eventName;
 
     private String eventDescription;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") // JSON'da ISO formatı sağlar
+    private BigDecimal eventIncome;
+
+    private BigDecimal eventExpense;
+
     private LocalDate startingDate;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate endingDate;
 
-    @OneToMany
-    private List<Volunteer> volunteer;
+    @Enumerated(EnumType.STRING)
+    private CurrencyType currency;
 
     @ManyToOne
     private CharityOrganization charityOrganization;
 
+    @OneToMany(mappedBy = "event", cascade = {CascadeType.MERGE,CascadeType.REMOVE})
+    private List<EventVolunteer> eventVolunteers;
 
 }
