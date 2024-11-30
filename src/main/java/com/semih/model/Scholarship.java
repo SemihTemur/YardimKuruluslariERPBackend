@@ -1,6 +1,7 @@
 package com.semih.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.semih.enums.CurrencyType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,15 +23,17 @@ public class Scholarship extends BaseEntity {
     @Column(nullable = false)
     private BigDecimal scholarshipAmount;
 
-    @ManyToOne(cascade = {CascadeType.MERGE,CascadeType.REMOVE})
+    @ManyToOne(cascade = CascadeType.ALL)
     private CharityOrganization charityOrganization;
 
-    @ManyToOne(cascade = {CascadeType.MERGE,CascadeType.REMOVE})
+    @ManyToOne(cascade = CascadeType.ALL)
     private Student student;
 
     private LocalDate startingDate;
 
     private LocalDate endingDate;
 
+    @Enumerated(EnumType.STRING)
+    private CurrencyType currency;
 
 }

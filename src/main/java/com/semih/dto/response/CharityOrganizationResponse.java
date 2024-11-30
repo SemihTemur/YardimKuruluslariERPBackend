@@ -5,17 +5,24 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 public class CharityOrganizationResponse {
 
-    private String organizationName;
+    private String charityOrganizationName;
 
-    private String phoneNumber;
+    private String charityOrganizationPhoneNumber;
 
-    private String email;
+    private String ownerName;
 
-    private AddressResponse addressResponse;
+    private String ownerSurname;
+
+    private BigDecimal budget;
+
+    private AddressResponse address;
+
 }

@@ -17,15 +17,14 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class EventVolunteer extends BaseEntity {
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "event_id")
     private Event event;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "volunteer_id")
     private Volunteer volunteer;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private VolunteerRole role;
 

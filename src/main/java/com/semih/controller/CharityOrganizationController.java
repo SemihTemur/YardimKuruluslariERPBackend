@@ -18,8 +18,8 @@ public class CharityOrganizationController {
     }
 
     @GetMapping(path="/getCharityOrganization")
-    public CharityOrganizationResponse getCharityOrganizationFindByName(@RequestParam String name) {
-       return charityOrganizationService.getCharityOrganizationFindByName(name);
+    public CharityOrganizationResponse getCharityOrganizationFindByName(@RequestParam String charityOrganizationName) {
+       return charityOrganizationService.getCharityOrganizationFindByName(charityOrganizationName);
     }
 
     @GetMapping(path="/listCharityOrganization")
@@ -42,9 +42,9 @@ public class CharityOrganizationController {
         charityOrganizationService.deleteCharityOrganizationById(id);
     }
 
-    @DeleteMapping(path="/deleteCharityOrganizationFindByName/{name}")
-    public String deleteCharityOrganizationByName(@PathVariable(required = true) String name) {
-        if(charityOrganizationService.deleteCharityOrganizationByName(name)) {
+    @DeleteMapping(path="/deleteCharityOrganizationFindByName/{charityOrganizationName}")
+    public String deleteCharityOrganizationByName(@PathVariable(required = true) String charityOrganizationName) {
+        if(charityOrganizationService.deleteCharityOrganizationByName(charityOrganizationName)) {
             return "Successfully deleted charity organization";
         }
         return "Failed to delete charity organization";

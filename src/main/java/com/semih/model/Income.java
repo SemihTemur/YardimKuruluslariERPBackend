@@ -24,7 +24,7 @@ public class Income extends BaseEntity {
 
     private String description;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "charity_organization_id")
     private CharityOrganization charityOrganization;
 }

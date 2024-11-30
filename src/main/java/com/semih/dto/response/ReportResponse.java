@@ -1,8 +1,7 @@
-package com.semih.model;
+package com.semih.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.semih.enums.ProfitOrLoss;
-import jakarta.persistence.*;
+import com.semih.model.CharityOrganization;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,20 +9,15 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Date;
 
-@Entity
-@Table(name="report")
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
-public class Report extends BaseEntity{
+public class ReportResponse {
 
-    @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
     private String description;
 
     private BigDecimal totalIncome;
@@ -36,11 +30,7 @@ public class Report extends BaseEntity{
 
     private LocalDate endingDate;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    private CharityOrganization charityOrganization;
+    private CharityOrganizationResponse charityOrganization;
 
-    @Enumerated(EnumType.STRING)
     private ProfitOrLoss profitOrLoss;
-
-
 }

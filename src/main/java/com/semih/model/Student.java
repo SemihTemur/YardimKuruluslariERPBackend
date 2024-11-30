@@ -21,7 +21,7 @@ public class Student extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(unique = true ,nullable = false)
     private String surname;
 
     @Column(nullable = false)
@@ -32,6 +32,9 @@ public class Student extends BaseEntity {
 
     @Column(unique = true, nullable = false)
     private String phoneNumber;
+
+    @Column(unique = true, nullable = false)
+    private String email;
 
     @Enumerated(EnumType.STRING)
     private GenderType genderType;

@@ -10,14 +10,4 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("rest/api")
 public class IncomeController {
 
-    private final IncomeService incomeService;
-
-    public IncomeController(IncomeService incomeService) {
-        this.incomeService = incomeService;
-    }
-
-    @PostMapping(path="/saveIncome")
-    public void saveIncome(@RequestBody IncomeRequest income){
-        incomeService.saveIncome(income);
-    }
 }

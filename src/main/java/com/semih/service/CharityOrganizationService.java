@@ -23,10 +23,10 @@ public class CharityOrganizationService {
         this.modelMapper = modelMapper;
     }
 
-    public CharityOrganizationResponse getCharityOrganizationFindByName(String name){
-        CharityOrganization savedCharityOrgaization = charityOrganizationRepository.findCharityOrganizationByOrganizationName(name);
+    public CharityOrganizationResponse getCharityOrganizationFindByName(String charityOrganizationName){
+        CharityOrganization savedCharityOrgaization = charityOrganizationRepository.findCharityOrganizationByCharityOrganizationName(charityOrganizationName);
         CharityOrganizationResponse charityOrganizationResponse = modelMapper.map(savedCharityOrgaization, CharityOrganizationResponse.class);
-        charityOrganizationResponse.setAddressResponse(modelMapper.map(savedCharityOrgaization.getAddress(), AddressResponse.class));
+        charityOrganizationResponse.setAddress(modelMapper.map(savedCharityOrgaization.getAddress(), AddressResponse.class));
         return charityOrganizationResponse;
     }
 
@@ -46,7 +46,7 @@ public class CharityOrganizationService {
     }
 
     public void updateCharityOrganization(CharityOrganizationRequest charityOrganizationRequest,String name) {
-        CharityOrganization savedCharityOrgaization = charityOrganizationRepository.findCharityOrganizationByOrganizationName(name);
+        CharityOrganization savedCharityOrgaization = charityOrganizationRepository.findCharityOrganizationByCharityOrganizationName(name);
         modelMapper.map(charityOrganizationRequest, savedCharityOrgaization);
         charityOrganizationRepository.save(savedCharityOrgaization);
     }
@@ -57,7 +57,7 @@ public class CharityOrganizationService {
 
     @Transactional
     public boolean deleteCharityOrganizationByName(String charityOrganizationName){
-       return charityOrganizationRepository.deleteCharityOrganizationByorganizationName(charityOrganizationName)>0;
+       return charityOrganizationRepository.deleteCharityOrganizationByCharityOrganizationName(charityOrganizationName)>0;
     }
 
 }

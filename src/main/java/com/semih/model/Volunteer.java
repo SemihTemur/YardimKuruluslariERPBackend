@@ -19,7 +19,7 @@ public class Volunteer extends BaseEntity{
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(unique = true,nullable = false)
     private String surname;
 
     @Column(unique = true, nullable = false)

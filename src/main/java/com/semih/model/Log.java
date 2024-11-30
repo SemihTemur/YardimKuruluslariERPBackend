@@ -33,6 +33,6 @@ public class Log {
     private String performedBy; // İşlemi yapan kullanıcının adı/ID'si
 
     @Column(nullable = false)
-    private LocalDateTime timestamp; // İşlem zamanı
+    private LocalDateTime createdDate ; // İşlem zamanı
 }
 

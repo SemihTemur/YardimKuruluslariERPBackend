@@ -6,15 +6,14 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-
 @ComponentScan(basePackages = "com.semih")
 @EntityScan(basePackages = "com.semih")
 @EnableJpaRepositories(basePackages = "com.semih")
-@SpringBootApplication
-public class YardimKuruluslariErpApplication {
+@SpringBootApplication(scanBasePackages = "com.semih")
+public class CharityOrganizationErpApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(YardimKuruluslariErpApplication.class, args);
+        SpringApplication.run(CharityOrganizationErpApplication.class, args);
     }
 
 }

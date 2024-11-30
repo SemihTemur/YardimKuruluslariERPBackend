@@ -26,8 +26,11 @@ public class CharityOrganization extends BaseEntity {
     @Column(unique = true, nullable = false)
     private String charityOrganizationEmail;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String ownerName;
+
+    @Column(nullable = false)
+    private String ownerSurname;
 
     @Column(unique = true, nullable = false)
     private String ownerTckn;

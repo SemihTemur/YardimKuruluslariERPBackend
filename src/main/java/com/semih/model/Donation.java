@@ -31,13 +31,13 @@ public class Donation extends BaseEntity {
     @Column(nullable = false)
     private BigDecimal amount;
 
-    @ManyToOne(cascade = {CascadeType.MERGE,CascadeType.REMOVE})
-    private Donor donor;
-
-    @ManyToOne(cascade = {CascadeType.MERGE,CascadeType.REMOVE})
-    private CharityOrganization charityOrganization;
-
     @ManyToOne(cascade = CascadeType.ALL)
     private Category category;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    private Donor donor;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    private CharityOrganization charityOrganization;
 
 }

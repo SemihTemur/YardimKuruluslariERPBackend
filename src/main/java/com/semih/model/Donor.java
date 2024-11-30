@@ -13,7 +13,7 @@ import java.util.List;
 @Setter
 public class Donor extends BaseEntity {
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String firstName;
 
     private String lastName;
