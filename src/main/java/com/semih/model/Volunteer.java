@@ -9,7 +9,8 @@ import lombok.Setter;
 import java.util.List;
 
 @Entity
-@Table(name = "volunteer")
+@Table(name = "volunteer",uniqueConstraints = {@UniqueConstraint(columnNames = {"name","surname"})
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,7 +20,7 @@ public class Volunteer extends BaseEntity{
     @Column(nullable = false)
     private String name;
 
-    @Column(unique = true,nullable = false)
+    @Column(nullable = false)
     private String surname;
 
     @Column(unique = true, nullable = false)

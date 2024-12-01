@@ -11,7 +11,8 @@ import lombok.Setter;
 import java.util.List;
 
 @Entity
-@Table(name = "student")
+@Table(name = "student",uniqueConstraints = {@UniqueConstraint(columnNames = {"name","surname"})
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,7 +22,7 @@ public class Student extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(unique = true ,nullable = false)
+    @Column(nullable = false)
     private String surname;
 
     @Column(nullable = false)

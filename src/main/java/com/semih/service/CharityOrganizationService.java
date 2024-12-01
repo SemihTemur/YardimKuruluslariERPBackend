@@ -23,13 +23,14 @@ public class CharityOrganizationService {
         this.modelMapper = modelMapper;
     }
 
-    public CharityOrganizationResponse getCharityOrganizationFindByName(String charityOrganizationName){
-        CharityOrganization savedCharityOrgaization = charityOrganizationRepository.findCharityOrganizationByCharityOrganizationName(charityOrganizationName);
-        CharityOrganizationResponse charityOrganizationResponse = modelMapper.map(savedCharityOrgaization, CharityOrganizationResponse.class);
-        charityOrganizationResponse.setAddress(modelMapper.map(savedCharityOrgaization.getAddress(), AddressResponse.class));
-        return charityOrganizationResponse;
+    // Post
+    public void saveCharityOrganization(List<CharityOrganizationRequest> charityOrganizationRequestList) {
+        for(CharityOrganizationRequest charityOrganizationRequest:charityOrganizationRequestList){
+            charityOrganizationRepository.save(modelMapper.map(charityOrganizationRequest, CharityOrganization.class));
+        }
     }
 
+    // Get
     public List<CharityOrganizationResponse> findAllCharityOrganization(){
         List<CharityOrganization> charityOrganizations = charityOrganizationRepository.findAll();
         List<CharityOrganizationResponse> charityOrganizationResponses = new ArrayList<>();
@@ -40,17 +41,21 @@ public class CharityOrganizationService {
         return charityOrganizationResponses;
     }
 
-    public void saveCharityOrganization(CharityOrganizationRequest charityOrganizationRequest) {
-        CharityOrganization charityOrganization = modelMapper.map(charityOrganizationRequest, CharityOrganization.class);
-        charityOrganizationRepository.save(charityOrganization);
+    public CharityOrganizationResponse getCharityOrganizationFindByName(String charityOrganizationName){
+        CharityOrganization savedCharityOrgaization = charityOrganizationRepository.findCharityOrganizationByCharityOrganizationName(charityOrganizationName);
+        CharityOrganizationResponse charityOrganizationResponse = modelMapper.map(savedCharityOrgaization, CharityOrganizationResponse.class);
+        charityOrganizationResponse.setAddress(modelMapper.map(savedCharityOrgaization.getAddress(), AddressResponse.class));
+        return charityOrganizationResponse;
     }
 
+    //Update
     public void updateCharityOrganization(CharityOrganizationRequest charityOrganizationRequest,String name) {
         CharityOrganization savedCharityOrgaization = charityOrganizationRepository.findCharityOrganizationByCharityOrganizationName(name);
         modelMapper.map(charityOrganizationRequest, savedCharityOrgaization);
         charityOrganizationRepository.save(savedCharityOrgaization);
     }
 
+    //Delete
     public void deleteCharityOrganizationById(Long id){
         charityOrganizationRepository.deleteById(id);
     }

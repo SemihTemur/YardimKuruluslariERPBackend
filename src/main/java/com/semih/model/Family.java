@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 public class Family extends BaseEntity {
 
-    @Column(nullable = false)
+    @Column(unique = true,nullable = false)
     private String familyName;
 
     private int familyMemberCount;

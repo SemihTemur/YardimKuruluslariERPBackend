@@ -1,5 +1,6 @@
 package com.semih.dto.request;
 
+import com.semih.enums.CurrencyType;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -43,6 +44,8 @@ public class CharityOrganizationRequest {
 
 //    @NotNull(message = "budget cannot be null")
     private BigDecimal budget;
+
+    private CurrencyType currency = CurrencyType.TRY;
 
 //    @NotNull(message = "address cannot be null")
     private AddressRequest address;

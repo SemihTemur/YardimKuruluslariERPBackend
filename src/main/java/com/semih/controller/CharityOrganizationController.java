@@ -17,9 +17,9 @@ public class CharityOrganizationController {
         this.charityOrganizationService = charityOrganizationService;
     }
 
-    @GetMapping(path="/getCharityOrganization")
-    public CharityOrganizationResponse getCharityOrganizationFindByName(@RequestParam String charityOrganizationName) {
-       return charityOrganizationService.getCharityOrganizationFindByName(charityOrganizationName);
+    @PostMapping(path="/saveCharityOrganization")
+    public void saveCharityOrganization(@RequestBody List<CharityOrganizationRequest> charityOrganizationRequest) {
+        charityOrganizationService.saveCharityOrganization(charityOrganizationRequest);
     }
 
     @GetMapping(path="/listCharityOrganization")
@@ -27,9 +27,10 @@ public class CharityOrganizationController {
         return charityOrganizationService.findAllCharityOrganization();
     }
 
-    @PostMapping(path="/saveCharityOrganization")
-    public void saveCharityOrganization(@RequestBody CharityOrganizationRequest charityOrganizationRequest) {
-        charityOrganizationService.saveCharityOrganization(charityOrganizationRequest);
+
+    @GetMapping(path="/getCharityOrganization")
+    public CharityOrganizationResponse getCharityOrganizationFindByName(@RequestParam String charityOrganizationName) {
+       return charityOrganizationService.getCharityOrganizationFindByName(charityOrganizationName);
     }
 
     @PutMapping(path="/updateCharityOrganization/{name}")

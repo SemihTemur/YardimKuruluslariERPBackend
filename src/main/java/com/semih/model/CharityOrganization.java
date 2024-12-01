@@ -1,5 +1,6 @@
 package com.semih.model;
 
+import com.semih.enums.CurrencyType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -37,6 +38,10 @@ public class CharityOrganization extends BaseEntity {
 
     @Column(nullable = false)
     private BigDecimal budget;
+
+    @Enumerated(EnumType.STRING)
+    private CurrencyType currency = CurrencyType.TRY;
+
 
     @OneToOne(cascade = CascadeType.ALL)
     private Address address;

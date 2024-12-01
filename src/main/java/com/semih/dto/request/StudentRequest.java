@@ -37,6 +37,11 @@ public class StudentRequest {
 //    @Pattern(regexp = "^\\+90\\d{10}$", message = "Phone number must be in the format +90XXXXXXXXXX")
     private String phoneNumber;
 
+
+    //    @NotBlank(message = "student email cannot be null or empty")
+//    @Email(message = "student email must be a valid email address")
+    private String email;
+
 //    @NotNull(message = "genderType cannot be null")
     private GenderType genderType;
 

@@ -1,5 +1,6 @@
 package com.semih.dto.response;
 
+import com.semih.enums.CurrencyType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,5 +25,7 @@ public class CharityOrganizationResponse {
     private BigDecimal budget;
 
     private AddressResponse address;
+
+    private CurrencyType currency;
 
 }
