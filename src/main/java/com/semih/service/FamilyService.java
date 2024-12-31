@@ -24,10 +24,9 @@ public class FamilyService {
     }
 
     // Post
-    public void saveFamily(List<FamilyRequest> familyRequestList){
-        for(FamilyRequest familyRequest:familyRequestList){
-            familyRepository.save(modelMapper.map(familyRequest, Family.class));
-        }
+    public boolean saveFamily(FamilyRequest familyRequest){
+       Family savedFamily = familyRepository.save(modelMapper.map(familyRequest, Family.class));
+       return savedFamily != null;
     }
 
     // Get
@@ -41,50 +40,31 @@ public class FamilyService {
     }
 
     public FamilyResponse getFamilyById(Long id){
-        Optional<Family> family  = familyRepository.findById(id);
-        if(family.isPresent()){
-            return modelMapper.map(family.get(), FamilyResponse.class);
-        }
-        return null;
-    }
-
-    public FamilyResponse getFamilyByFamilyName(String familyName){
-        Optional<Family> family  = familyRepository.findByFamilyName(familyName);
-        if(family.isPresent()){
-            return modelMapper.map(family.get(), FamilyResponse.class);
-        }
-        return null;
+        Family family  = familyRepository.findById(id).orElseThrow(null);
+        return modelMapper.map(family, FamilyResponse.class);
     }
 
     //update
-    public void updateFamilyById(Long id, FamilyRequest familyRequest){
-        Optional<Family> family  = familyRepository.findById(id);
-        if(family.isPresent()){
-            modelMapper.map(familyRequest, family.get());
-            familyRepository.save(family.get());
-        }
-        System.out.println("Bulunamadi");
-    }
+    public boolean updateFamilyById(Long id, FamilyRequest familyRequest){
+        Family family  = familyRepository.findById(id).orElseThrow(()->new RuntimeException("aile bulunamadi"));
+        modelMapper.map(familyRequest, family);
+        familyRepository.save(family);
+        return true;
 
-    public void updateFamilyByFamilyName(String familyName, FamilyRequest familyRequest){
-        Optional<Family> family  = familyRepository.findByFamilyName(familyName);
-        if(family.isPresent()){
-            modelMapper.map(familyRequest, family.get());
-            familyRepository.save(family.get());
-        }
-        System.out.println("Bulunamadi");
     }
-
 
     // Delete
     @Transactional
     public boolean deleteFamilyById(Long id){
-        return familyRepository.deleteByFamilyIdAndReturn(id)>0;
+        familyRepository.deleteById(id);
+
+        Optional<Family> family  = familyRepository.findById(id);
+
+        return family.isPresent();
     }
 
-    @Transactional
-    public boolean deleteFamilyByFamilyName(String familyName){
-        return familyRepository.deleteByFamilyName(familyName)>0;
+    public void deleteAllFamily(){
+        familyRepository.deleteAll();
     }
 
 }

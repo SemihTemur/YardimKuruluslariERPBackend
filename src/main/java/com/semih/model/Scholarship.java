@@ -2,6 +2,7 @@ package com.semih.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.semih.enums.CurrencyType;
+import com.semih.enums.PeriodType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,20 +21,27 @@ import java.util.Date;
 @Setter
 public class Scholarship extends BaseEntity {
 
-    @Column(nullable = false)
-    private BigDecimal scholarshipAmount;
-
-    @ManyToOne(cascade = CascadeType.ALL)
-    private CharityOrganization charityOrganization;
-
     @ManyToOne(cascade = CascadeType.ALL)
     private Student student;
 
-    private LocalDate startingDate;
-
-    private LocalDate endingDate;
+    @Column(nullable = false)
+    private BigDecimal scholarshipAmount;
 
     @Enumerated(EnumType.STRING)
     private CurrencyType currency;
 
+    @Enumerated(EnumType.STRING)
+    private PeriodType period; // aylık mı yıllık mı gunluk mu haftalık mı
+
+    private Integer duration; // kaç ... süreyle bu yardım yapılıcak
+
+    @Column(nullable = false)
+    private BigDecimal totalDonatedAmount;
+
+    // periodType ve duratıon'daki gelen değere gore arka planda ona gore bir tarihi ben ayarlıycam
+    // eger eğer gunluk secıp 3 demiş ise e ornegın 5.12.2024'ten 8.12.2024'e kadar bır para yardımı yapıcam
+    // bu 3 gunluk paranın tamamını ornegın gunluk 100 tl ise 3 gun 300 tl bunu gelır tablosuna eklıycem
+    private LocalDate startingDate;
+
+    private LocalDate endingDate;
 }

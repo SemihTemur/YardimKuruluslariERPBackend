@@ -31,6 +31,9 @@ public class Family extends BaseEntity {
     private Address address;
 
     @OneToMany(mappedBy = "family",cascade = {CascadeType.REMOVE,CascadeType.MERGE})
-    private List<Aid> aid;
+    private List<CashAid> cashAid;
+
+    @OneToMany(mappedBy = "family",cascade = {CascadeType.REMOVE,CascadeType.MERGE})
+    private List<InKindAid> inKindAid;
 
 }

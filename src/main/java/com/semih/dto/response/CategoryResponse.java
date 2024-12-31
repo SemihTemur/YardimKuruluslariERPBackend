@@ -11,5 +11,8 @@ import lombok.Setter;
 @Setter
 public class CategoryResponse {
 
-    private String categoryName;
+    private String itemName; // Eşyanın adı (örneğin: "Çorap", "Ayakkabı", vb.)
+
+    private String unit; // Birim (örneğin: "adet", "kg", "litre")
+
 }

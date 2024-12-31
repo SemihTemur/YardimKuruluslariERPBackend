@@ -26,6 +26,8 @@ public class FamilyRequest {
 //    @Pattern(regexp = "^\\+90\\d{10}$", message = "Phone number must be in the format +90XXXXXXXXXX")
     private String phoneNumber;
 
+    private String email;
+
 //    @NotNull(message ="address cannot be null")
     private AddressRequest address;
 }

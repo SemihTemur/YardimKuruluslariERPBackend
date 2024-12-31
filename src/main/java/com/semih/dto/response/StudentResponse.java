@@ -19,6 +19,12 @@ public class StudentResponse {
 
     private int age;
 
+    private String tckn;
+
+    private String phoneNumber;
+
+    private String email;
+
     private GenderType genderType;
 
     private EducationLevel educationLevel;

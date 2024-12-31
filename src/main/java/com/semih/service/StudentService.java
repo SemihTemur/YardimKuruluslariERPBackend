@@ -24,67 +24,53 @@ public class StudentService {
     }
 
     // Post
-    public void saveStudent(List<StudentRequest> studentRequestList){
-        for(StudentRequest studentRequest:studentRequestList){
-           studentRepository.save(modelMapper.map(studentRequest, Student.class));
-        }
+    public boolean saveStudent(StudentRequest studentRequest) {
+        Student savedStudent = studentRepository.save(modelMapper.map(studentRequest, Student.class));
+        return savedStudent != null;
     }
 
     // Get
-    public List<StudentResponse> getStudentList(){
+    public List<StudentResponse> getStudentList() {
         List<Student> studentList = studentRepository.findAll();
         List<StudentResponse> studentResponseList = new ArrayList<>();
-        for(Student student:studentList){
+        for (Student student : studentList) {
             studentResponseList.add(modelMapper.map(student, StudentResponse.class));
         }
         return studentResponseList;
     }
 
-    public StudentResponse getStudentById(Long id){
-        Optional<Student> student  = studentRepository.findById(id);
-        if(student.isPresent()){
-            return modelMapper.map(student.get(), StudentResponse.class);
-        }
-        return null;
+    public StudentResponse getStudentById(Long id) {
+        Student student = studentRepository.findById(id).orElseThrow(null);
+        return modelMapper.map(student, StudentResponse.class);
     }
 
-    public StudentResponse getStudentByNameAndSurname(String name, String surname){
-        Optional<Student> student  = studentRepository.findByNameAndSurname(name, surname);
-        if(student.isPresent()){
-            return modelMapper.map(student.get(), StudentResponse.class);
-        }
-        return null;
+    public Student getStudentByNameAndSurname(String name, String surname) {
+        return studentRepository.findByNameAndSurname(name, surname).orElseThrow(() -> new RuntimeException("Student not found"));
     }
 
     //update
-    public void updateStudentById(Long id, StudentRequest studentRequest){
-        Optional<Student> student  = studentRepository.findById(id);
-        if(student.isPresent()){
+    public boolean updateStudentById(Long id, StudentRequest studentRequest) {
+        Optional<Student> student = studentRepository.findById(id);
+        if (student.isPresent()) {
             modelMapper.map(studentRequest, student.get());
             studentRepository.save(student.get());
+            return true;
         }
-        System.out.println("Bulunamadi");
+        return false;
     }
-
-    public void updateStudentByNameAndSurname(String name, String surname, StudentRequest studentRequest){
-        Optional<Student> student  = studentRepository.findByNameAndSurname(name, surname);
-        if(student.isPresent()){
-            modelMapper.map(studentRequest, student.get());
-            studentRepository.save(student.get());
-        }
-        System.out.println("Bulunamadi");
-    }
-
 
     // Delete
     @Transactional
-    public boolean deleteStudentById(Long id){
-        return studentRepository.deleteByIdAndReturn(id)>0;
+    public boolean deleteStudentById(Long id) {
+        studentRepository.deleteById(id);
+
+        Optional<Student> student = studentRepository.findById(id);
+
+        return student.isPresent();
     }
 
-    @Transactional
-    public boolean deleteStudentByNameAndSurname(String name, String surname){
-        return studentRepository.deleteByNameAndSurname(name,surname)>0;
+    public void deleteAllStudents() {
+        studentRepository.deleteAll();
     }
 
 }

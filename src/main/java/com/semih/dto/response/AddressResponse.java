@@ -20,6 +20,4 @@ public class AddressResponse {
 
     private String street;
 
-    private UserType userType;
-
 }

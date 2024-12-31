@@ -1,12 +1,14 @@
 package com.semih.model;
 
+import com.semih.enums.GenderType;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
 
 @Entity
-@Table(name="donor")
+@Table(name="donor",uniqueConstraints = {@UniqueConstraint(columnNames = {"firstName","lastName"}),
+})
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -24,10 +26,16 @@ public class Donor extends BaseEntity {
     @Column(unique = true, nullable = false)
     private String email;
 
+    @Enumerated(EnumType.STRING)
+    private GenderType genderType;
+
     @OneToOne(cascade = CascadeType.ALL)
     private Address address;
 
     @OneToMany(mappedBy = "donor",cascade = {CascadeType.REMOVE,CascadeType.MERGE})
-    private List<Donation> donation;
+    private List<CashDonation> cashDonation;
+
+    @OneToMany(mappedBy = "donor",cascade = {CascadeType.REMOVE,CascadeType.MERGE})
+    private List<InKindDonation> inKindDonation;
 
 }

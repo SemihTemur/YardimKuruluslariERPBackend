@@ -15,4 +15,10 @@ public class FamilyResponse {
 
     private int familyMemberCount;
 
+    private String phoneNumber;
+
+    private String email;
+
+    private AddressResponse address;
+
 }

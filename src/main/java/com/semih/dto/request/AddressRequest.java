@@ -1,9 +1,6 @@
 package com.semih.dto.request;
 
 import com.semih.enums.UserType;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,7 +28,7 @@ public class AddressRequest {
 //    @Size(min = 3, message = "street name must be at least 3 characters long.")
     private String street;
 
-//    @NotNull(message = "userType cannot be null")
+//    @NotNull(message =o "userType cannot be null")
     private UserType userType;
 
 }

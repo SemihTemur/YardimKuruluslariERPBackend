@@ -1,6 +1,8 @@
 package com.semih.dto.request;
 
-import jakarta.validation.constraints.*;
+import com.semih.enums.GenderType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,6 +29,8 @@ public class DonorRequest {
 //    @NotBlank(message = "email cannot be null or empty")
 //    @Email(message = "email must be a valid email address")
     private String email;
+
+    private GenderType genderType;
 
 //    @NotNull(message = "address cannot be null")
     private AddressRequest address;

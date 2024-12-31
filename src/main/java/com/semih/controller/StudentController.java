@@ -17,50 +17,43 @@ public class StudentController {
         this.studentService = studentService;
     }
 
-    @PostMapping(path="/saveStudent")
-    public void saveStudent(@RequestBody List<StudentRequest> studentRequestList) {
-        studentService.saveStudent(studentRequestList);
+    @PostMapping(path = "/saveStudent")
+    public String saveStudent(@RequestBody StudentRequest studentRequest) {
+        if (studentService.saveStudent(studentRequest)) {
+            return "success";
+        }
+        return "fail";
     }
 
-    @GetMapping(path="/getStudentList")
+    @GetMapping(path = "/getStudentList")
     public List<StudentResponse> getStudentList() {
         return studentService.getStudentList();
     }
 
-    @GetMapping(path="/getStudentById/{id}")
+    @GetMapping(path = "/getStudentById/{id}")
     public StudentResponse getStudentById(@PathVariable Long id) {
         return studentService.getStudentById(id);
     }
 
-    @GetMapping(path="/getStudentByNameAndSurname")
-    public StudentResponse getStudentByNameAndSurname(@RequestParam String name, @RequestParam String surname) {
-        return studentService.getStudentByNameAndSurname(name, surname);
+    @PutMapping(path = "updateStudentById/{id}")
+    public String updateStudentById(@PathVariable Long id, @RequestBody StudentRequest studentRequest) {
+        if (studentService.updateStudentById(id, studentRequest))
+            return "success";
+        return "fail";
     }
 
-    @PutMapping(path="updateStudentById/{id}")
-    public void updateStudentById(@PathVariable Long id, @RequestBody StudentRequest studentRequest) {
-        studentService.updateStudentById(id, studentRequest);
-    }
-
-    @PutMapping(path="/updateStudentByNameAndSurname")
-    public void updateStudentByNameAndSurname(@RequestParam String name, @RequestParam String surname,@RequestBody StudentRequest studentRequest ) {
-        studentService.updateStudentByNameAndSurname(name, surname, studentRequest);
-    }
-
-    @DeleteMapping(path="/deleteStudentById/{id}")
+    @DeleteMapping(path = "/deleteStudentById/{id}")
     public String deleteStudentById(@PathVariable Long id) {
-        if(studentService.deleteStudentById(id)) {
-            return "Student deleted successfully";
+        if (studentService.deleteStudentById(id)) {
+            return "Student deleted failed";
         }
-        return "Student deletion failed";
+        return "Student deletion successfully";
     }
 
-    @DeleteMapping(path="/deleteStudentByNameAndSurname")
-    public String deleteStudentByNameAndSurname(@RequestParam String name, @RequestParam String surname) {
-        if(studentService.deleteStudentByNameAndSurname(name, surname)) {
-            return "Student deleted successfully";
-        }
-        return "Student deletion failed";
+    @DeleteMapping(path = "/deleteAllStudents")
+    public String deleteAllStudents() {
+        studentService.deleteAllStudents();
+        return "All students deleted successfully";
     }
 
 }

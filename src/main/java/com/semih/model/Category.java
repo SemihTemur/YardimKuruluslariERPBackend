@@ -1,22 +1,35 @@
 package com.semih.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 
 @Entity
 @Table(name="category")
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class Category extends BaseEntity{
+public class Category extends BaseEntity {
 
-    @Column(unique=true, nullable=false)
-    private String categoryName;
+    @Column(unique=true)
+    private String itemName; // Eşyanın adı (örneğin: "Çorap", "Ayakkabı", vb.)
+
+    @Column(nullable = false)
+    private String unit; // Birim (örneğin: "adet", "kg", "litre")
 
     @OneToMany(mappedBy = "category",cascade = {CascadeType.REMOVE,CascadeType.MERGE})
-    private List<Donation> donations;
+    private List<InKindAid> inKindAid;
+
+    @OneToMany(mappedBy="category",cascade = {CascadeType.REMOVE,CascadeType.MERGE})
+    private List<InKindDonation> inKindDonation;
+
+    public Category(String itemName, String unit) {
+        this.itemName = itemName;
+        this.unit = unit;
+    }
 
 }

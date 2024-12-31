@@ -1,5 +1,7 @@
 package com.semih.dto.response;
 
+import com.semih.enums.CurrencyType;
+import com.semih.enums.PeriodType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,14 +16,22 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class ScholarshipResponse {
 
+    private String studentName;
+
+    private String studentSurname;
+
     private BigDecimal scholarshipAmount;
 
-    private CharityOrganizationResponse charityOrganization;
+    private CurrencyType currency;
 
-    private StudentResponse student;
+    private PeriodType period;
+
+    private Integer duration;
 
     private LocalDate startingDate;
 
     private LocalDate endingDate;
+
+    private BigDecimal totalDonatedAmount;
 
 }

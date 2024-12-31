@@ -1,6 +1,22 @@
 package com.semih.enums;
 
-public enum GenderType {
+import com.fasterxml.jackson.annotation.JsonValue;
 
-    MALE,FEMALE
+public enum 
+GenderType {
+
+    ERKEK("Erkek"),       // Erkek
+    KADIN("Kadın");     // Kadın
+
+    private final String value;
+
+    GenderType(String value) {
+        this.value = value;
+    }
+
+    @JsonValue
+    public String getValue() {
+        return value;
+    }
+
 }

@@ -21,18 +21,22 @@ public class Log {
     private Long id;
 
     @Column(nullable = false)
-    private String action; // Örneğin: "Created", "Updated", "Deleted"
+    private String actionType; // Örneğin: "Oluşturuldu", "Güncellendi", "Silindi"
 
     @Column(nullable = false)
-    private String entityName; // Örneğin: "Donation", "Event"
+    private String targetEntity; // Örneğin: "Bağış", "Etkinlik"
 
     @Column(nullable = false)
-    private Long entityId; // İşlem yapılan entity'nin ID'si
+    private String performedByUser; // İşlemi yapan kullanıcı (Adı veya ID)
 
     @Column(nullable = false)
-    private String performedBy; // İşlemi yapan kullanıcının adı/ID'si
+    private LocalDateTime actionDate; // İşlem tarihi ve saati
 
-    @Column(nullable = false)
-    private LocalDateTime createdDate ; // İşlem zamanı
+    @Column
+    private Double amount; // İşlemle ilgili para tutarı (Opsiyonel)
+
+    @Column
+    private String amountDescription; // Para ile ilgili açıklama (Opsiyonel, örn: "Kasadan 2000 TL düşüldü")
+
 }
 
