@@ -1,6 +1,7 @@
 package com.semih.controller;
 
 import com.semih.dto.request.StudentRequest;
+import com.semih.dto.response.StudentNameResponse;
 import com.semih.dto.response.StudentResponse;
 import com.semih.service.StudentService;
 import org.springframework.web.bind.annotation.*;
@@ -18,16 +19,18 @@ public class StudentController {
     }
 
     @PostMapping(path = "/saveStudent")
-    public String saveStudent(@RequestBody StudentRequest studentRequest) {
-        if (studentService.saveStudent(studentRequest)) {
-            return "success";
-        }
-        return "fail";
+    public void saveStudent(@RequestBody StudentRequest studentRequest) {
+        studentService.saveStudent(studentRequest);
     }
 
     @GetMapping(path = "/getStudentList")
     public List<StudentResponse> getStudentList() {
         return studentService.getStudentList();
+    }
+
+    @GetMapping(path = "/getStudentNameAndSurnameList")
+    public List<StudentNameResponse> getStudentNameAndSurnameList() {
+        return studentService.getStudentNameAndSurnameList();
     }
 
     @GetMapping(path = "/getStudentById/{id}")
@@ -36,24 +39,18 @@ public class StudentController {
     }
 
     @PutMapping(path = "updateStudentById/{id}")
-    public String updateStudentById(@PathVariable Long id, @RequestBody StudentRequest studentRequest) {
-        if (studentService.updateStudentById(id, studentRequest))
-            return "success";
-        return "fail";
+    public void updateStudentById(@PathVariable Long id, @RequestBody StudentRequest studentRequest) {
+        studentService.updateStudentById(id, studentRequest);
     }
 
     @DeleteMapping(path = "/deleteStudentById/{id}")
-    public String deleteStudentById(@PathVariable Long id) {
-        if (studentService.deleteStudentById(id)) {
-            return "Student deleted failed";
-        }
-        return "Student deletion successfully";
+    public void deleteStudentById(@PathVariable Long id) {
+        studentService.deleteStudentById(id);
     }
 
     @DeleteMapping(path = "/deleteAllStudents")
-    public String deleteAllStudents() {
+    public void deleteAllStudents() {
         studentService.deleteAllStudents();
-        return "All students deleted successfully";
     }
 
 }

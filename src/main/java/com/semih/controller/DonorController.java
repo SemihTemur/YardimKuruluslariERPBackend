@@ -1,10 +1,8 @@
 package com.semih.controller;
 
 import com.semih.dto.request.DonorRequest;
-import com.semih.dto.request.FamilyRequest;
+import com.semih.dto.response.DonorNameResponse;
 import com.semih.dto.response.DonorResponse;
-import com.semih.dto.response.FamilyResponse;
-import com.semih.model.Donor;
 import com.semih.service.DonorService;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,12 +18,9 @@ public class DonorController {
         this.donorService = donorService;
     }
 
-    @PostMapping(path="/saveDonor")
-    public String saveDonor(@RequestBody DonorRequest donorRequest) {
-        if(donorService.saveDonor(donorRequest)){
-            return "success";
-        }
-        return "fail";
+    @PostMapping(path = "/saveDonor")
+    public void saveDonor(@RequestBody DonorRequest donorRequest) {
+        donorService.saveDonor(donorRequest);
     }
 
     @GetMapping(path = "/getDonorList")
@@ -38,26 +33,24 @@ public class DonorController {
         return donorService.getDonorById(id);
     }
 
-    @PutMapping(path = "updateDonorById/{id}")
-    public String updateDonorById(@PathVariable Long id, @RequestBody DonorRequest donorRequest) {
-        if (donorService.updateDonorById(id, donorRequest)) {
-            return "success";
-        }
-        return "fail";
+    @GetMapping(path = "/getDonorNameAndSurnameList")
+    public List<DonorNameResponse> getDonorNameAndSurnameList() {
+        return donorService.getDonorNameAndSurnameList();
+    }
+
+    @PutMapping(path = "/updateDonorById/{id}")
+    public void updateDonorById(@PathVariable Long id, @RequestBody DonorRequest donorRequest) {
+        donorService.updateDonorById(id, donorRequest);
     }
 
     @DeleteMapping(path = "/deleteDonorById/{id}")
-    public String deleteDonorById(@PathVariable Long id) {
-        if (donorService.deleteDonorById(id)) {
-            return "Delete deleted successfully";
-        }
-        return "Delete deletion failed";
+    public void deleteDonorById(@PathVariable Long id) {
+        donorService.deleteDonorById(id);
     }
 
     @DeleteMapping(path = "deleteAllDonor")
-    public String deleteAllFamily() {
+    public void deleteAllFamily() {
         donorService.deleteAllDonor();
-        return "All donor deleted successfully";
     }
 
 }

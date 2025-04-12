@@ -1,25 +1,15 @@
 package com.semih.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.semih.enums.CurrencyType;
 import com.semih.enums.PeriodType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Date;
 
 @Entity
 @Table(name = "cashAid")
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
-public class CashAid extends BaseEntity{
+public class CashAid extends BaseEntity {
 
     @ManyToOne
     private Family family;
@@ -45,4 +35,82 @@ public class CashAid extends BaseEntity{
 
     private LocalDate endingDate;
 
+    public CashAid() {
+    }
+
+    public CashAid(Long id, LocalDate createdDate, LocalDate modifiedDate, Family family, BigDecimal aidAmount, CurrencyType currency, PeriodType period, Integer duration, BigDecimal totalDonatedAmount, LocalDate startingDate, LocalDate endingDate) {
+        super(id, createdDate, modifiedDate);
+        this.family = family;
+        this.aidAmount = aidAmount;
+        this.currency = currency;
+        this.period = period;
+        this.duration = duration;
+        this.totalDonatedAmount = totalDonatedAmount;
+        this.startingDate = startingDate;
+        this.endingDate = endingDate;
+    }
+
+    public Family getFamily() {
+        return family;
+    }
+
+    public void setFamily(Family family) {
+        this.family = family;
+    }
+
+    public BigDecimal getAidAmount() {
+        return aidAmount;
+    }
+
+    public void setAidAmount(BigDecimal aidAmount) {
+        this.aidAmount = aidAmount;
+    }
+
+    public CurrencyType getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(CurrencyType currency) {
+        this.currency = currency;
+    }
+
+    public PeriodType getPeriod() {
+        return period;
+    }
+
+    public void setPeriod(PeriodType period) {
+        this.period = period;
+    }
+
+    public Integer getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Integer duration) {
+        this.duration = duration;
+    }
+
+    public BigDecimal getTotalDonatedAmount() {
+        return totalDonatedAmount;
+    }
+
+    public void setTotalDonatedAmount(BigDecimal totalDonatedAmount) {
+        this.totalDonatedAmount = totalDonatedAmount;
+    }
+
+    public LocalDate getStartingDate() {
+        return startingDate;
+    }
+
+    public void setStartingDate(LocalDate startingDate) {
+        this.startingDate = startingDate;
+    }
+
+    public LocalDate getEndingDate() {
+        return endingDate;
+    }
+
+    public void setEndingDate(LocalDate endingDate) {
+        this.endingDate = endingDate;
+    }
 }

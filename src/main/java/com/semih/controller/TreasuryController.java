@@ -1,9 +1,10 @@
 package com.semih.controller;
 
 import com.semih.dto.request.TreasuryRequest;
-import com.semih.model.Treasury;
 import com.semih.service.TreasuryService;
 import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/rest/api")
@@ -15,9 +16,14 @@ public class TreasuryController {
         this.treasuryService = treasuryService;
     }
 
-    @PostMapping(path="/saveTreasury")
+    @PostMapping(path = "/saveTreasury")
     public void saveTreasury(@RequestBody TreasuryRequest treasuryRequest) {
         treasuryService.saveTreasury(treasuryRequest);
+    }
+
+    @GetMapping(path = "/getTreasuryBalance")
+    public BigDecimal getTreasuryBalance() {
+        return treasuryService.getTreasuryBalance();
     }
 
 

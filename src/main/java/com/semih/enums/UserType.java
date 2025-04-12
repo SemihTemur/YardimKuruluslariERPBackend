@@ -6,9 +6,7 @@ public enum UserType {
 
     AILE("Aile"),
     OGRENCI("Öğrenci"),
-    BAGISCI("Bağışçı"),
-    GONULLU("Gönüllü"),
-    ETKINLIK("Etkinlik");
+    BAGISCI("Bağışçı");
 
     private final String userType;
 

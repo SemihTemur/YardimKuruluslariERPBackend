@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Getter
 @Setter
-public class CashAidResponse {
+public class CashAidResponse extends BaseResponse {
 
     private String familyName;
 
@@ -26,8 +26,21 @@ public class CashAidResponse {
 
     private Integer duration;
 
+    private BigDecimal totalDonatedAmount;
+
     private LocalDate startingDate;
 
     private LocalDate endingDate;
 
+    public CashAidResponse(Long id, LocalDate createdDate, LocalDate modifiedDate, String familyName, BigDecimal aidAmount, CurrencyType currency, PeriodType period, Integer duration, BigDecimal totalDonatedAmount, LocalDate startingDate, LocalDate endingDate) {
+        super(id, createdDate, modifiedDate);
+        this.familyName = familyName;
+        this.aidAmount = aidAmount;
+        this.currency = currency;
+        this.period = period;
+        this.duration = duration;
+        this.totalDonatedAmount = totalDonatedAmount;
+        this.startingDate = startingDate;
+        this.endingDate = endingDate;
+    }
 }

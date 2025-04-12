@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ScholarshipExpenseResponse {
+public class ScholarshipExpenseResponse  extends BaseResponse {
 
     private String studentName;
 

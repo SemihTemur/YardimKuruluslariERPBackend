@@ -1,27 +1,18 @@
 package com.semih.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.semih.enums.CurrencyType;
 import com.semih.enums.PeriodType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Date;
 
 @Entity
 @Table(name = "scholarship")
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
+
 public class Scholarship extends BaseEntity {
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     private Student student;
 
     @Column(nullable = false)
@@ -44,4 +35,83 @@ public class Scholarship extends BaseEntity {
     private LocalDate startingDate;
 
     private LocalDate endingDate;
+
+    public Scholarship() {
+    }
+
+    public Scholarship(Long id, LocalDate createdDate, LocalDate modifiedDate, Student student, BigDecimal scholarshipAmount, CurrencyType currency, PeriodType period, Integer duration, BigDecimal totalDonatedAmount, LocalDate startingDate, LocalDate endingDate) {
+        super(id, createdDate, modifiedDate);
+        this.student = student;
+        this.scholarshipAmount = scholarshipAmount;
+        this.currency = currency;
+        this.period = period;
+        this.duration = duration;
+        this.totalDonatedAmount = totalDonatedAmount;
+        this.startingDate = startingDate;
+        this.endingDate = endingDate;
+    }
+
+    public Student getStudent() {
+        return student;
+    }
+
+    public void setStudent(Student student) {
+        this.student = student;
+    }
+
+    public BigDecimal getScholarshipAmount() {
+        return scholarshipAmount;
+    }
+
+    public void setScholarshipAmount(BigDecimal scholarshipAmount) {
+        this.scholarshipAmount = scholarshipAmount;
+    }
+
+    public CurrencyType getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(CurrencyType currency) {
+        this.currency = currency;
+    }
+
+    public PeriodType getPeriod() {
+        return period;
+    }
+
+    public void setPeriod(PeriodType period) {
+        this.period = period;
+    }
+
+    public Integer getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Integer duration) {
+        this.duration = duration;
+    }
+
+    public BigDecimal getTotalDonatedAmount() {
+        return totalDonatedAmount;
+    }
+
+    public void setTotalDonatedAmount(BigDecimal totalDonatedAmount) {
+        this.totalDonatedAmount = totalDonatedAmount;
+    }
+
+    public LocalDate getStartingDate() {
+        return startingDate;
+    }
+
+    public void setStartingDate(LocalDate startingDate) {
+        this.startingDate = startingDate;
+    }
+
+    public LocalDate getEndingDate() {
+        return endingDate;
+    }
+
+    public void setEndingDate(LocalDate endingDate) {
+        this.endingDate = endingDate;
+    }
 }

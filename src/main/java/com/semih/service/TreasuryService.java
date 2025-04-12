@@ -3,7 +3,6 @@ package com.semih.service;
 import com.semih.dto.request.TreasuryRequest;
 import com.semih.model.Treasury;
 import com.semih.repository.TreasuryRepository;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -12,15 +11,25 @@ import java.math.BigDecimal;
 public class TreasuryService {
 
     private final TreasuryRepository treasuryRepository;
-    private final ModelMapper modelMapper;
 
-    public TreasuryService(TreasuryRepository treasuryRepository,ModelMapper modelMapper) {
+    private Treasury mapDtoToEntity(TreasuryRequest treasuryRequest) {
+        return new Treasury(
+                treasuryRequest.getBalance()
+        );
+    }
+
+//    private TreasuryResponse mapEntityToResponse(Treasury treasury) {
+//        return new TreasuryResponse(
+//                treasury.getBalance()
+//        );
+//    }
+
+    public TreasuryService(TreasuryRepository treasuryRepository) {
         this.treasuryRepository = treasuryRepository;
-        this.modelMapper = modelMapper;
     }
 
     public void saveTreasury(TreasuryRequest treasuryRequest) {
-        treasuryRepository.save(modelMapper.map(treasuryRequest, Treasury.class));
+        treasuryRepository.save(mapDtoToEntity(treasuryRequest));
     }
 
     public void updateTreasury(BigDecimal updatedCashBalance) {

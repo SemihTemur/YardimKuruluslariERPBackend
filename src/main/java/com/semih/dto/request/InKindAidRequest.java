@@ -14,11 +14,9 @@ public class InKindAidRequest {
 
     private String familyName;
 
-    private String itemName; // Eşyanın adı (örneğin: "Çorap", "Ayakkabı", vb.)
+    private CategoryRequest category;
 
     private Integer quantity; // Adet (örneğin: 3)
-
-    private String unit; // Birim (örneğin: "adet", "kg", "litre")
 
     private PeriodType period; // aylık mı yıllık mı gunluk mu haftalık mı
 

@@ -22,6 +22,4 @@ public class CashDonationRequest {
 
     private CurrencyType currency;
 
-    private String donationMessage;
-
 }

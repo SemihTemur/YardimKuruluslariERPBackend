@@ -2,6 +2,7 @@ package com.semih.controller;
 
 import com.semih.dto.request.CategoryRequest;
 import com.semih.dto.response.CategoryResponse;
+import com.semih.dto.response.CategoryUnitItemResponse;
 import com.semih.service.CategoryService;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,37 +19,33 @@ public class CategoryController {
     }
 
     @PostMapping(path = "/saveCategory")
-    public String saveCategory(@RequestBody CategoryRequest categoryRequest) {
-        if(categoryService.saveCategory(categoryRequest)) {
-            return "success";
-        }
-        return "fail";
+    public void saveCategory(@RequestBody CategoryRequest categoryRequest) {
+        categoryService.saveCategory(categoryRequest);
     }
 
-    @GetMapping(path="/getCategoryList")
+    @GetMapping(path = "/getCategoryList")
     public List<CategoryResponse> getCategoryList() {
         return categoryService.getAllCategories();
     }
 
-    @GetMapping(path="/getCategoryById/{id}")
+    @GetMapping(path = "/getCategoryItemNameAndUnitList")
+    public List<CategoryUnitItemResponse> getCategoryUnitItemList() {
+        return categoryService.getCategoryUnitItemList();
+    }
+
+    @GetMapping(path = "/getCategoryById/{id}")
     public CategoryResponse getCategoryById(@PathVariable Long id) {
         return categoryService.getCategoryById(id);
     }
 
-    @PutMapping(path="/updateCategoryById/{id}")
-    public String updateCategoryById(@PathVariable Long id, @RequestBody CategoryRequest categoryRequest) {
-        if(categoryService.updateCategoryById(id, categoryRequest)) {
-            return "success";
-        }
-        return "fail";
+    @PutMapping(path = "/updateCategoryById/{id}")
+    public void updateCategoryById(@PathVariable Long id, @RequestBody CategoryRequest categoryRequest) {
+        categoryService.updateCategoryById(id, categoryRequest);
     }
 
-    @DeleteMapping(path="/deleteCategoryById/{id}")
-    public String deleteCategoryById(@PathVariable Long id) {
-        if(categoryService.deleteCategoryById(id)) {
-            return "success";
-        }
-        return "fail";
+    @DeleteMapping(path = "/deleteCategoryById/{id}")
+    public void deleteCategoryById(@PathVariable Long id) {
+        categoryService.deleteCategoryById(id);
     }
 
 }

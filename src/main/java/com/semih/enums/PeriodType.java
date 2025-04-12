@@ -4,10 +4,10 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum PeriodType {
 
-    HAFTALIK("Haftalik"),    // Haftalık
+    HAFTALIK("Haftalık"),    // Haftalık
     AYLIK("Aylık"),   // Aylık
     YILLIK("Yıllık"),    // Yıllık
-    TEK_SEFERLİK("Tek Seferlik") ;
+    TEK_SEFERLİK("Tek Seferlik");
 
     private final String value;
 

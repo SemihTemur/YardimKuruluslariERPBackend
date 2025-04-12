@@ -1,6 +1,6 @@
 package com.semih.dto.response;
 
-import com.semih.enums.UserType;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

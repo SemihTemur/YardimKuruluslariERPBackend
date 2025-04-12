@@ -1,24 +1,15 @@
 package com.semih.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.time.LocalDate;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
-public class FamilyResponse {
-
-    private String familyName;
-
-    private int familyMemberCount;
-
-    private String phoneNumber;
-
-    private String email;
-
-    private AddressResponse address;
-
+public record FamilyResponse(
+        Long id,
+        LocalDate createdDate,
+        LocalDate modifiedDate,
+        String familyName,
+        int familyMemberCount,
+        String phoneNumber,
+        String email,
+        AddressResponse address
+) {
 }

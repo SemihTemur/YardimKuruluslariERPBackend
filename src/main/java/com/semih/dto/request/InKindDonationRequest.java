@@ -15,12 +15,7 @@ public class InKindDonationRequest {
 
     private String donorLastName;
 
-    private String donationMessage;
-
-    private String itemName; // Eşyanın adı (örneğin: "Çorap", "Ayakkabı", vb.)
+    private CategoryRequest category;
 
     private Integer quantity; // Adet (örneğin: 3)
-
-    private String unit; // Birim (örneğin: "adet", "kg", "litre")
-
 }

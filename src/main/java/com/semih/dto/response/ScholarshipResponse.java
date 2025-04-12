@@ -2,7 +2,6 @@ package com.semih.dto.response;
 
 import com.semih.enums.CurrencyType;
 import com.semih.enums.PeriodType;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,8 +12,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-public class ScholarshipResponse {
+public class ScholarshipResponse extends BaseResponse {
 
     private String studentName;
 
@@ -34,4 +32,16 @@ public class ScholarshipResponse {
 
     private BigDecimal totalDonatedAmount;
 
+    public ScholarshipResponse(Long id, LocalDate createdDate, LocalDate modifiedDate, String studentName, String studentSurname, BigDecimal scholarshipAmount, CurrencyType currency, PeriodType period, Integer duration, LocalDate startingDate, LocalDate endingDate, BigDecimal totalDonatedAmount) {
+        super(id, createdDate, modifiedDate);
+        this.studentName = studentName;
+        this.studentSurname = studentSurname;
+        this.scholarshipAmount = scholarshipAmount;
+        this.currency = currency;
+        this.period = period;
+        this.duration = duration;
+        this.startingDate = startingDate;
+        this.endingDate = endingDate;
+        this.totalDonatedAmount = totalDonatedAmount;
+    }
 }

@@ -1,24 +1,34 @@
 package com.semih.service;
 
+import com.semih.dto.response.InventoryResponse;
 import com.semih.model.Inventory;
 import com.semih.repository.InventoryRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class InventoryService {
 
     private final InventoryRepository inventoryRepository;
-    private final ModelMapper modelMapper;
 
-    public InventoryService(InventoryRepository inventoryRepository, ModelMapper modelMapper) {
+
+    public InventoryService(InventoryRepository inventoryRepository) {
         this.inventoryRepository = inventoryRepository;
-        this.modelMapper = modelMapper;
     }
 
-    // nakdi gider ve gelir eklerken
+    private InventoryResponse mapEntityToResponse(Inventory inventory){
+        return new InventoryResponse(
+                inventory.getId(),
+                inventory.getProductName(),
+                inventory.getQuantity(),
+                inventory.getUnit()
+        );
+    }
+
     public void saveInventory(Inventory inventory) {
         Optional<Inventory> savedInventory = inventoryRepository.findByProductName(inventory.getProductName());
 
@@ -33,14 +43,20 @@ public class InventoryService {
         }
     }
 
-    // nakdi gider eklerken ve guncellerken envanterı guncelleme aynı zamanda nakdi gelir guncellerken.
-    public void updateInventory(Inventory inKindInventory) {
-        inventoryRepository.save(inKindInventory);
+    public void updateInventory(Inventory updatedInventory) {
+        inventoryRepository.save(updatedInventory);
     }
 
-    // nakdi gider eklerken eklemeden once kontrol etmemızı saglıyo
+    public List<InventoryResponse> getAllInventory() {
+        return inventoryRepository.findAll().stream().map(this::mapEntityToResponse).collect(Collectors.toList());
+    }
+
     public Inventory getInventory(String productName) {
-        return inventoryRepository.findByProductName(productName).orElseThrow(()-> new RuntimeException("Kişi Bulunamadi"));
+        return inventoryRepository.findByProductName(productName).orElse(null);
+    }
+
+    public void deleteInventory(Inventory inventory) {
+        inventoryRepository.delete(inventory);
     }
 
     // tür silindiğinde o türe bağlı envanterdekı kaydın sılınmesını saglıyo

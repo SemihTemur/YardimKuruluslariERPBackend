@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class InKindInventoryResponse {
+public class InKindInventoryResponse  extends BaseResponse {
 
     private String productName; // Ürün adı (benzersiz)
 

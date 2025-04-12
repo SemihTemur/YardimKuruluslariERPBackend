@@ -1,6 +1,7 @@
 package com.semih.controller;
 
 import com.semih.dto.request.FamilyRequest;
+import com.semih.dto.response.FamilyNameResponse;
 import com.semih.dto.response.FamilyResponse;
 import com.semih.service.FamilyService;
 import org.springframework.web.bind.annotation.*;
@@ -18,11 +19,8 @@ public class FamilyController {
     }
 
     @PostMapping(path = "/saveFamily")
-    public String saveFamily(@RequestBody FamilyRequest familyRequest) {
-        if (familyService.saveFamily(familyRequest)) {
-            return "success";
-        }
-        return "fail";
+    public void saveFamily(@RequestBody FamilyRequest familyRequest) {
+        familyService.saveFamily(familyRequest);
     }
 
     @GetMapping(path = "/getFamilyList")
@@ -35,26 +33,24 @@ public class FamilyController {
         return familyService.getFamilyById(id);
     }
 
+    @GetMapping(path = "/getFamilyNamesList")
+    public List<FamilyNameResponse> getFamilyNames() {
+        return familyService.getFamilyNames();
+    }
+
     @PutMapping(path = "updateFamilyById/{id}")
-    public String updateFamilyById(@PathVariable Long id, @RequestBody FamilyRequest FamilyRequest) {
-        if (familyService.updateFamilyById(id, FamilyRequest)) {
-            return "success";
-        }
-        return "fail";
+    public void updateFamilyById(@PathVariable Long id, @RequestBody FamilyRequest FamilyRequest) {
+        familyService.updateFamilyById(id, FamilyRequest);
     }
 
     @DeleteMapping(path = "/deleteFamilyById/{id}")
-    public String deleteFamilyById(@PathVariable Long id) {
-        if (familyService.deleteFamilyById(id)) {
-            return "Family deleted successfully";
-        }
-        return "Family deletion failed";
+    public void deleteFamilyById(@PathVariable Long id) {
+        familyService.deleteFamilyById(id);
     }
 
     @DeleteMapping(path = "deleteAllFamily")
-    public String deleteAllFamily() {
+    public void deleteAllFamily() {
         familyService.deleteAllFamily();
-        return "All family deleted successfully";
     }
 
 }
