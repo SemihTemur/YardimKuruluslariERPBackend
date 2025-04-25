@@ -1,8 +1,10 @@
 package com.semih.service;
 
 import com.semih.dto.request.ScholarshipRequest;
+import com.semih.dto.response.BaseResponse;
 import com.semih.dto.response.ScholarshipExpenseResponse;
 import com.semih.dto.response.ScholarshipResponse;
+import com.semih.exception.InsufficientBalanceException;
 import com.semih.model.Scholarship;
 import com.semih.repository.ScholarshipRepository;
 import com.semih.utils.HelperUtils;
@@ -31,25 +33,25 @@ public class ScholarshipService {
         this.helperUtils = helperUtils;
     }
 
-    private Scholarship mapDtoToEntity(ScholarshipRequest scholarshipRequest) {
+    private Scholarship mapToEntity(ScholarshipRequest scholarshipRequest) {
         Scholarship scholarship = new Scholarship();
 
         // gelen ogrenci isim ve soyismini alıyorum.
-        scholarship.setStudent(studentService.getStudentByNameAndSurname(scholarshipRequest.getStudentName(), scholarshipRequest.getStudentSurname()));
+        scholarship.setStudent(studentService.getStudentByNameAndSurname(scholarshipRequest.studentName(), scholarshipRequest.studentSurname()));
 
-        scholarship.setScholarshipAmount(scholarshipRequest.getScholarshipAmount());
-        scholarship.setCurrency(scholarshipRequest.getCurrency());
-        scholarship.setPeriod(scholarshipRequest.getPeriod());
-        scholarship.setDuration(scholarshipRequest.getDuration());
+        scholarship.setScholarshipAmount(scholarshipRequest.scholarshipAmount());
+        scholarship.setCurrency(scholarshipRequest.currency());
+        scholarship.setPeriod(scholarshipRequest.period());
+        scholarship.setDuration(scholarshipRequest.duration());
 
         return scholarship;
     }
 
-    private ScholarshipResponse mapEntityToResponse(Scholarship scholarship) {
+    private ScholarshipResponse mapToResponse(Scholarship scholarship) {
         return new ScholarshipResponse(
-                scholarship.getId(),
-                scholarship.getCreatedDate(),
-                scholarship.getModifiedDate(),
+                new BaseResponse(scholarship.getId(),
+                        scholarship.getCreatedDate(),
+                        scholarship.getModifiedDate()),
                 scholarship.getStudent().getName(),
                 scholarship.getStudent().getSurname(),
                 scholarship.getScholarshipAmount(),
@@ -62,8 +64,11 @@ public class ScholarshipService {
         );
     }
 
-    private ScholarshipExpenseResponse mapEntityToExpenseResponse(Scholarship scholarship) {
+    private ScholarshipExpenseResponse mapToExpenseResponse(Scholarship scholarship) {
         return new ScholarshipExpenseResponse(
+                new BaseResponse(scholarship.getId(),
+                        scholarship.getCreatedDate(),
+                        scholarship.getModifiedDate()),
                 scholarship.getStudent().getName(),
                 scholarship.getStudent().getSurname(),
                 scholarship.getTotalDonatedAmount(),
@@ -71,79 +76,83 @@ public class ScholarshipService {
         );
     }
 
-
-    public void saveScholarship(ScholarshipRequest scholarshipRequest) {
+    public ScholarshipResponse saveScholarship(ScholarshipRequest scholarshipRequest) {
         // Öncelikle gelen değerin içeriklerini alıyorum.
-        BigDecimal scholarshipAmount = scholarshipRequest.getScholarshipAmount();
-        Integer duration = scholarshipRequest.getDuration();
+        BigDecimal scholarshipAmount = scholarshipRequest.scholarshipAmount();
+        Integer duration = scholarshipRequest.duration();
 
         //Try'den bağımsız toplam parayı almayı sağlıyon kod.
         BigDecimal totalDonatedAmount = helperUtils.calculateTotalDonatedAmount(scholarshipAmount, duration);
 
         // daha sonra gelen parayı tl'ye cevırıyorum kasadaki para ile kontrol etmek ıcın.
-        BigDecimal totalDonatedAmountTRY = currencyRateService.convertToTry(String.valueOf(scholarshipRequest.getCurrency()), totalDonatedAmount);
+        BigDecimal totalDonatedAmountTRY = currencyRateService
+                .convertToTry(String.valueOf(scholarshipRequest.currency()), totalDonatedAmount);
 
         // kasadaki o anlık parayı alıyorum
         BigDecimal cashBalance = treasuryService.getTreasuryBalance();
 
-        // eğer kasadaki para miktari daha büyük ise toplam bağışlancak mıktardan,
-        // çevirme ve kaydetme işlemlerini yapıyorum.
-        if (cashBalance.compareTo(totalDonatedAmountTRY) >= 0) {
-            Scholarship scholarship = mapDtoToEntity(scholarshipRequest);
-            scholarship.setTotalDonatedAmount(totalDonatedAmount);
 
-            // o anki tarihi alma
-            LocalDate today = LocalDate.now();
-            scholarship.setStartingDate(today);
-
-            // bitiş tarihini alma
-            String period = String.valueOf(scholarship.getPeriod());
-            LocalDate endDate = helperUtils.determineEndingDate(period, duration, today);
-            scholarship.setEndingDate(endDate);
-
-            // kasadaki para miktarını güncelleme
-            BigDecimal updatedCashBalance = cashBalance.subtract(totalDonatedAmountTRY);
-
-            treasuryService.updateTreasury(updatedCashBalance);
-
-            scholarshipRepository.save(scholarship);
-        } else {
-            throw new RuntimeException("Yetersiz Bakiye");
+        if (cashBalance.compareTo(totalDonatedAmountTRY) < 0) {
+            throw new InsufficientBalanceException("İşlem gerçekleştirilemedi. Kasadaki mevcut miktar yeterli değil.");
         }
 
+        // eğer kasadaki para miktari daha büyük ise toplam bağışlancak mıktardan,
+        // çevirme ve kaydetme işlemlerini yapıyorum.
+        Scholarship savedScholarship = mapToEntity(scholarshipRequest);
+        savedScholarship.setTotalDonatedAmount(totalDonatedAmount);
+
+        // o anki tarihi alma
+        LocalDate today = LocalDate.now();
+        savedScholarship.setStartingDate(today);
+
+        // bitiş tarihini alma
+        String period = String.valueOf(savedScholarship.getPeriod());
+        LocalDate endDate = helperUtils.determineEndingDate(period, duration, today);
+        savedScholarship.setEndingDate(endDate);
+
+        // kasadaki para miktarını güncelleme
+        BigDecimal updatedCashBalance = cashBalance.subtract(totalDonatedAmountTRY);
+
+        treasuryService.updateTreasury(updatedCashBalance);
+
+        savedScholarship = scholarshipRepository.save(savedScholarship);
+        return mapToResponse(savedScholarship);
     }
 
-    public List<ScholarshipResponse> getAllScholarship() {
+    public List<ScholarshipResponse> getScholarshipList() {
         return scholarshipRepository.findAll().stream()
-                .map(this::mapEntityToResponse)
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     // Burs Gideri için
-    public List<ScholarshipExpenseResponse> getAllScholarshipExpense() {
+    public List<ScholarshipExpenseResponse> getScholarshipExpenseList() {
         return scholarshipRepository.findAll()
                 .stream()
-                .map(this::mapEntityToExpenseResponse)
+                .map(this::mapToExpenseResponse)
                 .collect(Collectors.toList());
     }
 
-    public void updateScholarshipById(Long id, ScholarshipRequest scholarshipRequest) {
+    public ScholarshipResponse updateScholarshipById(Long id, ScholarshipRequest scholarshipRequest) {
         // Güncellenecek olan nesneyi ve toplam bağışlanan parayı alıyorum.
-        Scholarship scholarship = scholarshipRepository.findById(id).orElseThrow(() -> new RuntimeException("Bulunamadi"));
+        Scholarship scholarship = scholarshipRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Burs bulunamadı!!!" + id));
         BigDecimal totalDonatedAmount = scholarship.getTotalDonatedAmount();
 
         //  şimdi toplam parayı Try'ye cevırmek kaldı.
         String currencyType = String.valueOf(scholarship.getCurrency());
         BigDecimal totalDonatedAmountTRY = currencyRateService.convertToTry(currencyType, totalDonatedAmount);
 
-        BigDecimal receivedAmount = scholarshipRequest.getScholarshipAmount();
-        Integer receivedDuration = scholarshipRequest.getDuration();
+        BigDecimal receivedAmount = scholarshipRequest.scholarshipAmount();
+        Integer receivedDuration = scholarshipRequest.duration();
 
         // gelen toplam parayı hesaplayalım.
-        BigDecimal receivedTotalDonatedAmount = helperUtils.calculateTotalDonatedAmount(receivedAmount, receivedDuration);
+        BigDecimal receivedTotalDonatedAmount = helperUtils
+                .calculateTotalDonatedAmount(receivedAmount, receivedDuration);
 
         // gelen toplam parayı TRY çevirelim.
-        BigDecimal receivedTotalDonatedAmountTRY = currencyRateService.convertToTry(String.valueOf(scholarshipRequest.getCurrency()), receivedTotalDonatedAmount);
+        BigDecimal receivedTotalDonatedAmountTRY = currencyRateService
+                .convertToTry(String.valueOf(scholarshipRequest.currency()), receivedTotalDonatedAmount);
 
         BigDecimal cashBalance = treasuryService.getTreasuryBalance();
 
@@ -153,15 +162,14 @@ public class ScholarshipService {
         BigDecimal updatedCashBalance = null;
 
         // mevcut bakiyeye fark eklenince 0dan büyük ya da eşit ise
-        if (cashBalance.add(difference).compareTo(BigDecimal.ZERO) >= 0) {
-            updatedCashBalance = cashBalance.add(difference);
-        } else {
+        if (cashBalance.add(difference).compareTo(BigDecimal.ZERO) < 0) {
             // hata fırlatıcam burda
-            throw new RuntimeException("Yetersiz Bakiye");
+            throw new InsufficientBalanceException("İşlem gerçekleştirilemedi. Kasadaki mevcut miktar yeterli değil!!!");
         }
 
+        updatedCashBalance = cashBalance.add(difference);
         // gelen yeni nesneyı entity'e çeviriyorum
-        Scholarship updatedScholarship = mapDtoToEntity(scholarshipRequest);
+        Scholarship updatedScholarship = mapToEntity(scholarshipRequest);
         updatedScholarship.setId(id);
         updatedScholarship.setTotalDonatedAmount(receivedTotalDonatedAmount);
         updatedScholarship.setCreatedDate(scholarship.getCreatedDate());
@@ -169,22 +177,25 @@ public class ScholarshipService {
         // başlangıç değerine göre ve gelen değere göre son tarihi guncellıyorum
         LocalDate receivedDate = scholarship.getStartingDate();
         updatedScholarship.setStartingDate(receivedDate);
-        String receivedPeriodType = String.valueOf(scholarshipRequest.getPeriod().getValue());
+        String receivedPeriodType = String.valueOf(scholarshipRequest.period().getValue());
         LocalDate endDate = helperUtils.determineEndingDate(receivedPeriodType, receivedDuration, receivedDate);
         updatedScholarship.setEndingDate(endDate);
 
         // kasadaki para mıktarını azaltıp verıtabanında guncellıyorum;
         treasuryService.updateTreasury(updatedCashBalance);
 
-        scholarshipRepository.save(updatedScholarship);
+        updatedScholarship = scholarshipRepository.save(updatedScholarship);
+        return mapToResponse(updatedScholarship);
     }
 
-    public void deleteScholarshipById(Long id) {
-        Scholarship scholarship = scholarshipRepository.findById(id).orElseThrow(() -> new RuntimeException("Bulunamadi"));
-        BigDecimal totalDonatedAmount = scholarship.getTotalDonatedAmount();
+    public ScholarshipResponse deleteScholarshipById(Long id) {
+        Scholarship deletedScholarship = scholarshipRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Burs bulunamadı!!!" + id));
+        BigDecimal totalDonatedAmount = deletedScholarship.getTotalDonatedAmount();
 
         // kayıtlı olan toplam miktari tl'ye çeviriyorum.
-        BigDecimal totalDonatedAmountTry = currencyRateService.convertToTry(scholarship.getCurrency().toString(), totalDonatedAmount);
+        BigDecimal totalDonatedAmountTry = currencyRateService
+                .convertToTry(deletedScholarship.getCurrency().toString(), totalDonatedAmount);
 
         // kasadaki parayı alıyorum.
         BigDecimal cashBalance = treasuryService.getTreasuryBalance();
@@ -192,7 +203,8 @@ public class ScholarshipService {
 
         treasuryService.updateTreasury(updatedBalance);
 
-        scholarshipRepository.delete(scholarship);
+        scholarshipRepository.delete(deletedScholarship);
+        return mapToResponse(deletedScholarship);
     }
 
 }

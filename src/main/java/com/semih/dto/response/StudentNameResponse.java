@@ -1,15 +1,6 @@
 package com.semih.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
-public class StudentNameResponse {
-    private String studentName;
-    private String studentSurname;
+public record StudentNameResponse(String studentName,
+                                  String studentSurname
+) {
 }

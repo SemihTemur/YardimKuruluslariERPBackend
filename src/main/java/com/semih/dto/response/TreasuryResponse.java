@@ -1,21 +1,12 @@
 package com.semih.dto.response;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import java.math.BigDecimal;
 
-@Getter
-@Setter
-@NoArgsConstructor
-public class TreasuryResponse extends BaseResponse {
-
-    private BigDecimal balance;
-
-    private final String currency = "TRY";
-
-    public TreasuryResponse(BigDecimal balance) {
-        this.balance = balance;
+public record TreasuryResponse(BaseResponse baseResponse,
+                               BigDecimal balance,
+                               String currency
+) {
+    public TreasuryResponse(BaseResponse baseResponse, BigDecimal balance) {
+        this(baseResponse, balance, "TRY");
     }
 }

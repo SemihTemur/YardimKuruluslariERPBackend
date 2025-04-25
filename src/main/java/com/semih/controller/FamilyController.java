@@ -3,7 +3,10 @@ package com.semih.controller;
 import com.semih.dto.request.FamilyRequest;
 import com.semih.dto.response.FamilyNameResponse;
 import com.semih.dto.response.FamilyResponse;
+import com.semih.dto.response.RestResponse;
 import com.semih.service.FamilyService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,18 +22,21 @@ public class FamilyController {
     }
 
     @PostMapping(path = "/saveFamily")
-    public void saveFamily(@RequestBody FamilyRequest familyRequest) {
-        familyService.saveFamily(familyRequest);
+    public ResponseEntity<RestResponse<FamilyResponse>> saveFamily(@RequestBody FamilyRequest familyRequest) {
+        FamilyResponse savedFamilyResponse = familyService.saveFamily(familyRequest);
+        return new ResponseEntity<>(RestResponse.of(savedFamilyResponse), HttpStatus.OK);
     }
 
     @GetMapping(path = "/getFamilyList")
-    public List<FamilyResponse> getFamilyList() {
-        return familyService.getFamilyList();
+    public ResponseEntity<RestResponse<List<FamilyResponse>>> getFamilyList() {
+        List<FamilyResponse> familyResponseList = familyService.getFamilyList();
+        return new ResponseEntity<>(RestResponse.of(familyResponseList), HttpStatus.OK);
     }
 
     @GetMapping(path = "/getFamilyById/{id}")
-    public FamilyResponse getFamilyById(@PathVariable Long id) {
-        return familyService.getFamilyById(id);
+    public ResponseEntity<RestResponse<FamilyResponse>> getFamilyById(@PathVariable Long id) {
+        FamilyResponse familyResponse = familyService.getFamilyById(id);
+        return new ResponseEntity<>(RestResponse.of(familyResponse), HttpStatus.OK);
     }
 
     @GetMapping(path = "/getFamilyNamesList")
@@ -39,18 +45,21 @@ public class FamilyController {
     }
 
     @PutMapping(path = "updateFamilyById/{id}")
-    public void updateFamilyById(@PathVariable Long id, @RequestBody FamilyRequest FamilyRequest) {
-        familyService.updateFamilyById(id, FamilyRequest);
+    public ResponseEntity<RestResponse<FamilyResponse>> updateFamilyById(@PathVariable Long id, @RequestBody FamilyRequest FamilyRequest) {
+        FamilyResponse updatedFamilyResponse = familyService.updateFamilyById(id, FamilyRequest);
+        return new ResponseEntity<>(RestResponse.of(updatedFamilyResponse), HttpStatus.OK);
     }
 
     @DeleteMapping(path = "/deleteFamilyById/{id}")
-    public void deleteFamilyById(@PathVariable Long id) {
-        familyService.deleteFamilyById(id);
+    public ResponseEntity<RestResponse<FamilyResponse>> deleteFamilyById(@PathVariable Long id) {
+        FamilyResponse deletedFamilyResponse = familyService.deleteFamilyById(id);
+        return new ResponseEntity<>(RestResponse.of(deletedFamilyResponse), HttpStatus.OK);
     }
 
     @DeleteMapping(path = "deleteAllFamily")
-    public void deleteAllFamily() {
-        familyService.deleteAllFamily();
+    public ResponseEntity<RestResponse<List<FamilyResponse>>> deleteAllFamily() {
+        List<FamilyResponse> deletedFamilyResponseList = familyService.deleteAllFamily();
+        return new ResponseEntity<>(RestResponse.of(deletedFamilyResponseList), HttpStatus.OK);
     }
 
 }

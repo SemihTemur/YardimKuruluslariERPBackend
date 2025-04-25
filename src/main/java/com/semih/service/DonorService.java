@@ -2,8 +2,10 @@ package com.semih.service;
 
 import com.semih.dto.request.DonorRequest;
 import com.semih.dto.response.AddressResponse;
+import com.semih.dto.response.BaseResponse;
 import com.semih.dto.response.DonorNameResponse;
 import com.semih.dto.response.DonorResponse;
+import com.semih.exception.NotFoundException;
 import com.semih.model.Address;
 import com.semih.model.Donor;
 import com.semih.repository.DonorRepository;
@@ -22,28 +24,28 @@ public class DonorService {
         this.donorRepository = donorRepository;
     }
 
-    private Donor mapDtoToEntity(DonorRequest donorRequest) {
+    private Donor mapToEntity(DonorRequest donorRequest) {
         return new Donor(
-                donorRequest.getFirstName(),
-                donorRequest.getLastName(),
-                donorRequest.getPhoneNumber(),
-                donorRequest.getEmail(),
-                donorRequest.getGenderType(),
+                donorRequest.firstName(),
+                donorRequest.lastName(),
+                donorRequest.phoneNumber(),
+                donorRequest.email(),
+                donorRequest.genderType(),
                 new Address(
-                        donorRequest.getAddress().getCity(),
-                        donorRequest.getAddress().getDistrict(),
-                        donorRequest.getAddress().getNeighborhood(),
-                        donorRequest.getAddress().getStreet(),
-                        donorRequest.getAddress().getUserType()
+                        donorRequest.address().city(),
+                        donorRequest.address().district(),
+                        donorRequest.address().neighborhood(),
+                        donorRequest.address().street(),
+                        donorRequest.address().userType()
                 )
         );
     }
 
-    private DonorResponse mapEntityToResponse(Donor donor) {
+    private DonorResponse mapToResponse(Donor donor) {
         return new DonorResponse(
-                donor.getId(),
-                donor.getCreatedDate(),
-                donor.getModifiedDate(),
+                new BaseResponse(donor.getId(),
+                        donor.getCreatedDate(),
+                        donor.getModifiedDate()),
                 donor.getFirstName(),
                 donor.getLastName(),
                 donor.getPhoneNumber(),
@@ -58,8 +60,9 @@ public class DonorService {
         );
     }
 
-    public void saveDonor(DonorRequest donorRequest) {
-        donorRepository.save(mapDtoToEntity(donorRequest));
+    public DonorResponse saveDonor(DonorRequest donorRequest) {
+        Donor savedDonor = donorRepository.save(mapToEntity(donorRequest));
+        return mapToResponse(savedDonor);
     }
 
     // Get
@@ -67,14 +70,15 @@ public class DonorService {
         List<Donor> donorList = donorRepository.findAll();
         List<DonorResponse> donorResponseList = new ArrayList<>();
         for (Donor donor : donorList) {
-            donorResponseList.add(mapEntityToResponse(donor));
+            donorResponseList.add(mapToResponse(donor));
         }
         return donorResponseList;
     }
 
     public DonorResponse getDonorById(Long id) {
-        Donor donor = donorRepository.findById(id).orElseThrow(null);
-        return mapEntityToResponse(donor);
+        Donor donor = donorRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Bağışçı bulunamadı!!!" + id));
+        return mapToResponse(donor);
     }
 
     public List<DonorNameResponse> getDonorNameAndSurnameList() {
@@ -83,26 +87,33 @@ public class DonorService {
 
     public Donor getDonorByFirstNameAndLastName(String firstName, String lastName) {
         return donorRepository.findByFirstNameAndLastName(firstName, lastName)
-                .orElseThrow(() -> new RuntimeException("Kişi Bulunamadi"));
+                .orElseThrow(() -> new NotFoundException("Bağışçı bulunamadı!!!" + firstName + lastName));
     }
 
     //update
-    public void updateDonorById(Long id, DonorRequest donorRequest) {
-        Donor existingDonor = donorRepository.findById(id).orElseThrow(() -> new RuntimeException("Bağışçı Bulunamadı"));
-        Donor updatedDonor = mapDtoToEntity(donorRequest);
+    public DonorResponse updateDonorById(Long id, DonorRequest donorRequest) {
+        Donor existingDonor = donorRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Bağışçı bulunamadı!!!" + id));
+        Donor updatedDonor = mapToEntity(donorRequest);
         updatedDonor.setId(existingDonor.getId());
         updatedDonor.setCreatedDate(existingDonor.getCreatedDate());
-        donorRepository.save(updatedDonor);
+        updatedDonor = donorRepository.save(updatedDonor);
+        return mapToResponse(updatedDonor);
     }
 
     // Delete
     @Transactional
-    public void deleteDonorById(Long id) {
-        donorRepository.deleteById(id);
+    public DonorResponse deleteDonorById(Long id) {
+        Donor deletedDonor = donorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Bağışçı bulunamadı!!!" + id));
+        donorRepository.delete(deletedDonor);
+        return mapToResponse(deletedDonor);
     }
 
-    public void deleteAllDonor() {
+    public List<DonorResponse> deleteAllDonor() {
+        List<DonorResponse> donorResponseList = getDonorList();
         donorRepository.deleteAll();
+        return donorResponseList;
     }
 
 }

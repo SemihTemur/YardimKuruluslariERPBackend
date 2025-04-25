@@ -1,7 +1,10 @@
 package com.semih.controller;
 
 import com.semih.dto.response.InventoryResponse;
+import com.semih.dto.response.RestResponse;
 import com.semih.service.InventoryService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,8 +21,9 @@ public class InventoryController {
         this.inventoryService = inventoryService;
     }
 
-    @GetMapping(path="/getInventoryList")
-    public List<InventoryResponse> getInventoryList() {
-       return inventoryService.getAllInventory();
+    @GetMapping(path = "/getInventoryList")
+    public ResponseEntity<RestResponse<List<InventoryResponse>>> getInventoryList() {
+        List<InventoryResponse> inventoryResponseList = inventoryService.getInventoryList();
+        return new ResponseEntity<>(RestResponse.of(inventoryResponseList), HttpStatus.OK);
     }
 }

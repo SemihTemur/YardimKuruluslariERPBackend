@@ -2,7 +2,10 @@ package com.semih.controller;
 
 import com.semih.dto.request.CashDonationRequest;
 import com.semih.dto.response.CashDonationResponse;
+import com.semih.dto.response.RestResponse;
 import com.semih.service.CashDonationService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,23 +21,27 @@ public class CashDonationController {
     }
 
     @PostMapping("/saveCashDonation")
-    public void saveCashDonation(@RequestBody CashDonationRequest cashDonationRequest) {
-        cashDonationService.saveCashDonation(cashDonationRequest);
+    public ResponseEntity<RestResponse<CashDonationResponse>> saveCashDonation(@RequestBody CashDonationRequest cashDonationRequest) {
+        CashDonationResponse savedCashDonationResponse = cashDonationService.saveCashDonation(cashDonationRequest);
+        return new ResponseEntity<>(RestResponse.of(savedCashDonationResponse), HttpStatus.OK);
     }
 
     @GetMapping("/getCashDonationList")
-    public List<CashDonationResponse> getCashDonationList() {
-        return cashDonationService.getAllCashDonations();
+    public ResponseEntity<RestResponse<List<CashDonationResponse>>> getCashDonationList() {
+        List<CashDonationResponse> cashDonationResponseList = cashDonationService.getCashDonationList();
+        return new ResponseEntity<>(RestResponse.of(cashDonationResponseList), HttpStatus.OK);
     }
 
     @PutMapping("/updateCashDonationById/{id}")
-    public void updateCashDonationById(@PathVariable Long id, @RequestBody CashDonationRequest cashDonationRequest) {
-        cashDonationService.updateCashDonationById(id,cashDonationRequest);
+    public ResponseEntity<RestResponse<CashDonationResponse>> updateCashDonationById(@PathVariable Long id, @RequestBody CashDonationRequest cashDonationRequest) {
+        CashDonationResponse updatedCashDonationResponse = cashDonationService.updateCashDonationById(id, cashDonationRequest);
+        return new ResponseEntity<>(RestResponse.of(updatedCashDonationResponse), HttpStatus.OK);
     }
 
     @DeleteMapping("/deleteCashDonationById/{id}")
-    public void deleteCashDonationById(@PathVariable Long id) {
-        cashDonationService.deleteCashDonationById(id);
+    public ResponseEntity<RestResponse<CashDonationResponse>> deleteCashDonationById(@PathVariable Long id) {
+        CashDonationResponse deletedCashDonationResponse = cashDonationService.deleteCashDonationById(id);
+        return new ResponseEntity<>(RestResponse.of(deletedCashDonationResponse), HttpStatus.OK);
     }
 
 }

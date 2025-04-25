@@ -12,7 +12,6 @@ import java.util.Optional;
 @Repository
 public interface DonorRepository extends JpaRepository<Donor, Long> {
 
-
     Optional<Donor> findByFirstNameAndLastName(String donorName, String lastName);
 
     @Query("SELECT new com.semih.dto.response.DonorNameResponse(d.firstName, d.lastName) FROM Donor d")

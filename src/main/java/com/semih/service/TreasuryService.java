@@ -12,9 +12,9 @@ public class TreasuryService {
 
     private final TreasuryRepository treasuryRepository;
 
-    private Treasury mapDtoToEntity(TreasuryRequest treasuryRequest) {
+    private Treasury mapToEntity(TreasuryRequest treasuryRequest) {
         return new Treasury(
-                treasuryRequest.getBalance()
+                treasuryRequest.balance()
         );
     }
 
@@ -29,7 +29,7 @@ public class TreasuryService {
     }
 
     public void saveTreasury(TreasuryRequest treasuryRequest) {
-        treasuryRepository.save(mapDtoToEntity(treasuryRequest));
+        treasuryRepository.save(mapToEntity(treasuryRequest));
     }
 
     public void updateTreasury(BigDecimal updatedCashBalance) {

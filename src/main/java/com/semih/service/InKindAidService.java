@@ -1,8 +1,11 @@
 package com.semih.service;
 
 import com.semih.dto.request.InKindAidRequest;
+import com.semih.dto.response.BaseResponse;
 import com.semih.dto.response.CategoryResponse;
 import com.semih.dto.response.InKindAidResponse;
+import com.semih.exception.InsufficientInventoryException;
+import com.semih.exception.NotFoundException;
 import com.semih.model.Category;
 import com.semih.model.InKindAid;
 import com.semih.model.Inventory;
@@ -32,23 +35,23 @@ public class InKindAidService {
         this.helperUtils = helperUtils;
     }
 
-    private InKindAid mapDtoToEntity(InKindAidRequest inKindAidRequest) {
+    private InKindAid mapToEntity(InKindAidRequest inKindAidRequest) {
         return new InKindAid(
-                inKindAidRequest.getQuantity(),
-                inKindAidRequest.getPeriod(),
-                inKindAidRequest.getDuration(),
-                categoryService.getCategoryByItemName(inKindAidRequest.getCategory().getItemName()),
-                familyService.getFamilyByName(inKindAidRequest.getFamilyName())
+                inKindAidRequest.quantity(),
+                inKindAidRequest.period(),
+                inKindAidRequest.duration(),
+                categoryService.getCategoryByItemName(inKindAidRequest.category().itemName()),
+                familyService.getFamilyByName(inKindAidRequest.familyName())
         );
     }
 
-    private InKindAidResponse mapEntityToResponse(InKindAid inKindAid) {
+    private InKindAidResponse mapToResponse(InKindAid inKindAid) {
         return new InKindAidResponse(
-                inKindAid.getId(),
-                inKindAid.getCreatedDate(),
-                inKindAid.getModifiedDate(),
+                new BaseResponse(inKindAid.getId(),
+                        inKindAid.getCreatedDate(),
+                        inKindAid.getModifiedDate()),
                 inKindAid.getFamily().getFamilyName(),
-                mapCategoryToCategoryResponse(inKindAid.getCategory()),
+                mapToCategoryResponse(inKindAid.getCategory()),
                 inKindAid.getQuantity(),
                 inKindAid.getPeriod(),
                 inKindAid.getDuration(),
@@ -58,14 +61,17 @@ public class InKindAidService {
         );
     }
 
-    private CategoryResponse mapCategoryToCategoryResponse(Category category) {
+    private CategoryResponse mapToCategoryResponse(Category category) {
         return new CategoryResponse(
+                new BaseResponse(category.getId(),
+                        category.getCreatedDate(),
+                        category.getModifiedDate()),
                 category.getItemName(),
                 category.getUnit()
         );
     }
 
-    private Inventory mapEntityToInventory(InKindAid inKindAid, int totalQuantity) {
+    private Inventory mapToInventory(InKindAid inKindAid, int totalQuantity) {
         return new Inventory(
                 inKindAid.getCategory().getItemName(),
                 totalQuantity,
@@ -74,8 +80,8 @@ public class InKindAidService {
     }
 
     @Transactional
-    public void saveInKindAid(InKindAidRequest inKindAidRequest) {
-        InKindAid inKindAid = mapDtoToEntity(inKindAidRequest);
+    public InKindAidResponse saveInKindAid(InKindAidRequest inKindAidRequest) {
+        InKindAid inKindAid = mapToEntity(inKindAidRequest);
         Integer incomingAmount = inKindAid.getQuantity();
         Integer duration = inKindAid.getDuration();
 
@@ -93,7 +99,7 @@ public class InKindAidService {
         } else if (difference == 0) {
             inventoryService.deleteInventory(inventory);
         } else {
-            throw new RuntimeException("Yetersiz Envanter!!!");
+            throw new InsufficientInventoryException("İşlem gerçekleştirilemedi. Envanterdeki ürün miktarı yetersiz!!!");
         }
 
         inKindAid.setTotalDistributedQuantity(totalIncomingQuantity);
@@ -105,26 +111,36 @@ public class InKindAidService {
         LocalDate endingDate = helperUtils.determineEndingDate(period, duration, startingDate);
         inKindAid.setEndingDate(endingDate);
 
-        inKindAidRepository.save(inKindAid);
+        InKindAid savedInKindAid = inKindAidRepository.save(inKindAid);
+        return mapToResponse(savedInKindAid);
     }
 
-    public List<InKindAidResponse> getAllInKindAid() {
+    public List<InKindAidResponse> getInKindAidList() {
         return inKindAidRepository.findAll()
                 .stream()
-                .map(this::mapEntityToResponse)
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
-    public void updateInKindAidById(Long id, InKindAidRequest inKindAidRequest) {
+    public InKindAidResponse updateInKindAidById(Long id, InKindAidRequest inKindAidRequest) {
         InKindAid inKindAid = inKindAidRepository.findById(id).
-                orElseThrow(() -> new RuntimeException("Bulunamadi!!!"));
+                orElseThrow(() -> new NotFoundException("Ayni bağış bulunamadı!!!" + id));
         Integer totalDistributedQuantity = inKindAid.getQuantity();
 
-        Integer incomingAmount = inKindAidRequest.getQuantity();
-        Integer incomingDuration = inKindAidRequest.getDuration();
+        Integer incomingAmount = inKindAidRequest.quantity();
+        Integer incomingDuration = inKindAidRequest.duration();
         Integer totalIncomingQuantity = helperUtils.calculateTotalDonatedQuantity(incomingAmount, incomingDuration);
 
         Inventory inventory = inventoryService.getInventory(inKindAid.getCategory().getItemName());
+
+        // eğer null gelirse demekki envanterden ürün silinmiş tamamı bağışlandığı için.
+        // bu yüzden gelen değere göre güncelleme yapıcağım
+        if (inventory == null && totalDistributedQuantity <= totalIncomingQuantity) {
+            throw new InsufficientInventoryException("İşlem gerçekleştirilemedi. " +
+                    "Envanterdeki ürün miktarı yetersiz!!!");
+
+        }
+
         int totalQuantity = inventory.getQuantity();
 
         int difference = totalDistributedQuantity - totalIncomingQuantity;
@@ -135,10 +151,10 @@ public class InKindAidService {
         } else if (difference == 0) {
             inventoryService.deleteInventory(inventory);
         } else {
-            throw new RuntimeException("Yetersiz Envanter!!!");
+            throw new InsufficientInventoryException("İşlem gerçekleştirilemedi. Envanterdeki ürün miktarı yetersiz!!!");
         }
 
-        InKindAid updatedInKindAid = mapDtoToEntity(inKindAidRequest);
+        InKindAid updatedInKindAid = mapToEntity(inKindAidRequest);
         updatedInKindAid.setId(inKindAid.getId());
 
         //toplam parayı ekle
@@ -147,19 +163,22 @@ public class InKindAidService {
         // başlangıc ve bitiş tarihlerini guncelle
         updatedInKindAid.setCreatedDate(inKindAid.getCreatedDate());
         updatedInKindAid.setStartingDate(inKindAid.getStartingDate());
-        LocalDate endingDate = helperUtils.determineEndingDate(String.valueOf(updatedInKindAid.getPeriod()), incomingDuration, inKindAid.getStartingDate());
+        LocalDate endingDate = helperUtils
+                .determineEndingDate(String.valueOf(updatedInKindAid.getPeriod()),
+                        incomingDuration, inKindAid.getStartingDate());
         updatedInKindAid.setEndingDate(endingDate);
 
-        inKindAidRepository.save(updatedInKindAid);
+        updatedInKindAid = inKindAidRepository.save(updatedInKindAid);
+        return mapToResponse(updatedInKindAid);
     }
 
-    public void deleteInKindAidById(Long id) {
-        InKindAid inKindAid = inKindAidRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Bulunamadi"));
+    public InKindAidResponse deleteInKindAidById(Long id) {
+        InKindAid deletedInKindAid = inKindAidRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Ayni yardım bulunamadı!!!" + id));
 
-        Integer totalDistributedQuantity = inKindAid.getTotalDistributedQuantity();
+        Integer totalDistributedQuantity = deletedInKindAid.getTotalDistributedQuantity();
 
-        Inventory inventory = inventoryService.getInventory(inKindAid.getCategory().getItemName());
+        Inventory inventory = inventoryService.getInventory(deletedInKindAid.getCategory().getItemName());
 
         // eğer  null değilse  bağışlanan mıktarı gerı alıp uzerıne ekle
         if (inventory != null) {
@@ -167,11 +186,12 @@ public class InKindAidService {
         }
         // eğer null ise yeni bir nesne olusturup bagıslanan degerın bazı bılgılerını atıyorum
         else {
-            inventory = mapEntityToInventory(inKindAid, totalDistributedQuantity);
+            inventory = mapToInventory(deletedInKindAid, totalDistributedQuantity);
         }
 
         inventoryService.updateInventory(inventory);
-        inKindAidRepository.delete(inKindAid);
+        inKindAidRepository.delete(deletedInKindAid);
+        return mapToResponse(deletedInKindAid);
     }
 
 

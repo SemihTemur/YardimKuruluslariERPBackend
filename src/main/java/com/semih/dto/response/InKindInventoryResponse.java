@@ -1,20 +1,8 @@
 package com.semih.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class InKindInventoryResponse  extends BaseResponse {
-
-    private String productName; // Ürün adı (benzersiz)
-
-    private int quantity; // Mevcut miktar
-
-    private String unit;
-
+public record InKindInventoryResponse(BaseResponse baseResponse,
+                                      String productName,
+                                      int quantity,
+                                      String unit
+) {
 }

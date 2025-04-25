@@ -2,13 +2,14 @@ package com.semih.service;
 
 import com.semih.dto.request.FamilyRequest;
 import com.semih.dto.response.AddressResponse;
+import com.semih.dto.response.BaseResponse;
 import com.semih.dto.response.FamilyNameResponse;
 import com.semih.dto.response.FamilyResponse;
+import com.semih.exception.NotFoundException;
 import com.semih.model.Address;
 import com.semih.model.Family;
 import com.semih.repository.FamilyRepository;
 import jakarta.transaction.Transactional;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,32 +20,32 @@ public class FamilyService {
 
     private final FamilyRepository familyRepository;
 
-    public FamilyService(FamilyRepository familyRepository, ModelMapper modelMapper) {
+    public FamilyService(FamilyRepository familyRepository) {
         this.familyRepository = familyRepository;
 
     }
 
-    private Family toEntity(FamilyRequest familyRequest) {
+    private Family mapToEntity(FamilyRequest familyRequest) {
         return new Family(
                 familyRequest.familyName(),
                 familyRequest.familyMemberCount(),
                 familyRequest.phoneNumber(),
                 familyRequest.email(),
                 new Address(
-                        familyRequest.address().getCity(),
-                        familyRequest.address().getDistrict(),
-                        familyRequest.address().getNeighborhood(),
-                        familyRequest.address().getStreet(),
-                        familyRequest.address().getUserType()
+                        familyRequest.address().city(),
+                        familyRequest.address().district(),
+                        familyRequest.address().neighborhood(),
+                        familyRequest.address().street(),
+                        familyRequest.address().userType()
                 )
         );
     }
 
-    private FamilyResponse toResponse(Family family) {
+    private FamilyResponse mapToResponse(Family family) {
         return new FamilyResponse(
-                family.getId(),
-                family.getCreatedDate(),
-                family.getModifiedDate(),
+                new BaseResponse(family.getId(),
+                        family.getCreatedDate(),
+                        family.getModifiedDate()),
                 family.getFamilyName(),
                 family.getFamilyMemberCount(),
                 family.getPhoneNumber(),
@@ -58,11 +59,10 @@ public class FamilyService {
         );
     }
 
-
     // Post
-    public void saveFamily(FamilyRequest familyRequest) {
-        Family family = toEntity(familyRequest);
-        familyRepository.save(family);
+    public FamilyResponse saveFamily(FamilyRequest familyRequest) {
+        Family savedFamily = familyRepository.save(mapToEntity(familyRequest));
+        return mapToResponse(savedFamily);
     }
 
     // Get
@@ -70,18 +70,20 @@ public class FamilyService {
         List<Family> familyList = familyRepository.findAll();
         List<FamilyResponse> familyResponseList = new ArrayList<>();
         for (Family family : familyList) {
-            familyResponseList.add(toResponse(family));
+            familyResponseList.add(mapToResponse(family));
         }
         return familyResponseList;
     }
 
     public FamilyResponse getFamilyById(Long id) {
-        Family family = familyRepository.findById(id).orElseThrow(null);
-        return toResponse(family);
+        Family family = familyRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Aile bulunamadı!!!" + id));
+        return mapToResponse(family);
     }
 
     public Family getFamilyByName(String name) {
-        return familyRepository.findByFamilyName(name).orElseThrow(() -> new RuntimeException("Bulunamadi"));
+        return familyRepository.findByFamilyName(name)
+                .orElseThrow(() -> new NotFoundException("Aile bulunamadı!!!" + name));
     }
 
     public List<FamilyNameResponse> getFamilyNames() {
@@ -89,24 +91,29 @@ public class FamilyService {
     }
 
     //update
-    public void updateFamilyById(Long id, FamilyRequest familyRequest) {
-        Family family = familyRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("aile bulunamadi"));
-        Family updatedFamily = toEntity(familyRequest);
+    public FamilyResponse updateFamilyById(Long id, FamilyRequest familyRequest) {
+        Family existingFamily = familyRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Aile bulunamadı!!!" + id));
+        Family updatedFamily = mapToEntity(familyRequest);
         updatedFamily.setId(id);
-        updatedFamily.setCreatedDate(family.getCreatedDate());
-        familyRepository.save(updatedFamily);
-
+        updatedFamily.setCreatedDate(existingFamily.getCreatedDate());
+        updatedFamily = familyRepository.save(updatedFamily);
+        return mapToResponse(updatedFamily);
     }
 
     // Delete
     @Transactional
-    public void deleteFamilyById(Long id) {
-        familyRepository.deleteById(id);
+    public FamilyResponse deleteFamilyById(Long id) {
+        Family deletedFamily = familyRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Aile bulunamadı!!!" + id));
+        familyRepository.delete(deletedFamily);
+        return mapToResponse(deletedFamily);
     }
 
-    public void deleteAllFamily() {
+    public List<FamilyResponse> deleteAllFamily() {
+        List<FamilyResponse> familyResponseList = getFamilyList();
         familyRepository.deleteAll();
+        return familyResponseList;
     }
 
 }

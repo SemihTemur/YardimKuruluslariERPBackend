@@ -1,7 +1,10 @@
 package com.semih.service;
 
 import com.semih.dto.request.OtherIncomeRequest;
+import com.semih.dto.response.BaseResponse;
 import com.semih.dto.response.OtherIncomeResponse;
+import com.semih.exception.InsufficientBalanceException;
+import com.semih.exception.NotFoundException;
 import com.semih.model.OtherIncome;
 import com.semih.repository.OtherIncomeRepository;
 import org.springframework.stereotype.Service;
@@ -23,32 +26,31 @@ public class OtherIncomeService {
         this.treasuryService = treasuryService;
     }
 
-    private OtherIncome mapDtoToEntity(OtherIncomeRequest otherIncomeRequest) {
+    private OtherIncome mapToEntity(OtherIncomeRequest otherIncomeRequest) {
         return new OtherIncome(
-                otherIncomeRequest.getDescription(),
-                otherIncomeRequest.getAmount(),
-                otherIncomeRequest.getCurrency()
+                otherIncomeRequest.description(),
+                otherIncomeRequest.amount(),
+                otherIncomeRequest.currency()
         );
     }
 
-    private OtherIncomeResponse mapEntityToResponse(OtherIncome otherIncome) {
+    private OtherIncomeResponse mapToResponse(OtherIncome otherIncome) {
         return new OtherIncomeResponse(
-                otherIncome.getId(),
-                otherIncome.getCreatedDate(),
-                otherIncome.getModifiedDate(),
+                new BaseResponse(otherIncome.getId(),
+                        otherIncome.getCreatedDate(),
+                        otherIncome.getModifiedDate()),
                 otherIncome.getDescription(),
                 otherIncome.getAmount(),
                 otherIncome.getCurrency()
         );
     }
 
-
-    public void saveOtherIncome(OtherIncomeRequest otherIncomeRequest) {
-        OtherIncome otherIncome = mapDtoToEntity(otherIncomeRequest);
-        ;
+    public OtherIncomeResponse saveOtherIncome(OtherIncomeRequest otherIncomeRequest) {
+        OtherIncome savedOtherIncome = mapToEntity(otherIncomeRequest);
 
         // Gelen değeri try çevir.
-        BigDecimal amountTry = currencyRateService.convertToTry(String.valueOf(otherIncome.getCurrency()), otherIncomeRequest.getAmount());
+        BigDecimal amountTry = currencyRateService
+                .convertToTry(String.valueOf(savedOtherIncome.getCurrency()), otherIncomeRequest.amount());
 
         // Mevcut kasadaki bakiyeyi al
         BigDecimal cashBalance = treasuryService.getTreasuryBalance();
@@ -56,18 +58,20 @@ public class OtherIncomeService {
         BigDecimal updatedBalance = cashBalance.add(amountTry);
         treasuryService.updateTreasury(updatedBalance);
 
-        otherIncomeRepository.save(otherIncome);
+        savedOtherIncome = otherIncomeRepository.save(savedOtherIncome);
+        return mapToResponse(savedOtherIncome);
     }
 
-    public List<OtherIncomeResponse> getAllOtherIncome() {
+    public List<OtherIncomeResponse> getOtherIncomeList() {
         return otherIncomeRepository.findAll()
                 .stream()
-                .map(this::mapEntityToResponse)
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
-    public void updateOtherIncomeById(Long id, OtherIncomeRequest otherIncomeRequest) {
-        OtherIncome otherIncome = otherIncomeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("There is no other income with this id"));
+    public OtherIncomeResponse updateOtherIncomeById(Long id, OtherIncomeRequest otherIncomeRequest) {
+        OtherIncome otherIncome = otherIncomeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Diğer gelir bulunamadı!!!" + id));
 
         // mevcut kayıttaki bilgileri al
         BigDecimal amount = otherIncome.getAmount();
@@ -75,7 +79,7 @@ public class OtherIncomeService {
         BigDecimal amountTry = currencyRateService.convertToTry(currencyType, amount);
 
         // gelen kayıttaki bilgileri al
-        BigDecimal receivedAmount = otherIncomeRequest.getAmount();
+        BigDecimal receivedAmount = otherIncomeRequest.amount();
         String receivedCurrencyType = String.valueOf(receivedAmount);
         BigDecimal receivedAmountTry = currencyRateService.convertToTry(receivedCurrencyType, receivedAmount);
 
@@ -89,34 +93,37 @@ public class OtherIncomeService {
             treasuryService.updateTreasury(updatedBalance);
         } else {
             // Hata fırlat
-            throw new RuntimeException("Yetersiz bakiye.");
+            throw new InsufficientBalanceException("İşlem gerçekleştirilemedi. Kasadaki mevcut miktar yeterli değil!!!");
         }
 
         // gelen değeri guncellemek ıcın
-        OtherIncome updatedOtherIncome = mapDtoToEntity(otherIncomeRequest);
+        OtherIncome updatedOtherIncome = mapToEntity(otherIncomeRequest);
         updatedOtherIncome.setId(id);
         updatedOtherIncome.setCreatedDate(otherIncome.getCreatedDate());
-        otherIncomeRepository.save(updatedOtherIncome);
+        updatedOtherIncome = otherIncomeRepository.save(updatedOtherIncome);
+        return mapToResponse(updatedOtherIncome);
     }
 
-    public void deleteOtherIncomeById(Long id) {
+    public OtherIncomeResponse deleteOtherIncomeById(Long id) {
         // silmeden önce kasadan azaltma kontrolu
-        OtherIncome savedOtherIncome = otherIncomeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("There is no other income with this id"));
-        BigDecimal amount = savedOtherIncome.getAmount();
-        String currencyType = String.valueOf(savedOtherIncome.getCurrency());
+        OtherIncome deletedOtherIncome = otherIncomeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Diğer gelir bulunamadı!!!" + id));
+        BigDecimal amount = deletedOtherIncome.getAmount();
+        String currencyType = String.valueOf(deletedOtherIncome.getCurrency());
 
         // silmeden önce parayı azaltmak için tl'ye çevir
         BigDecimal amountTry = currencyRateService.convertToTry(currencyType, amount);
 
         BigDecimal cashBalance = treasuryService.getTreasuryBalance();
 
-        if (cashBalance.compareTo(amountTry) >= 0) {
-            BigDecimal updatedBalance = cashBalance.subtract(amountTry);
-            treasuryService.updateTreasury(updatedBalance);
-            otherIncomeRepository.delete(savedOtherIncome);
-        } else {
-            throw new RuntimeException("Yetersiz bakiye.");
+        if (cashBalance.compareTo(amountTry) < 0) {
+            throw new InsufficientBalanceException("İşlem gerçekleştirilemedi. Kasadaki mevcut miktar yeterli değil!!!");
+
         }
+        BigDecimal updatedBalance = cashBalance.subtract(amountTry);
+        treasuryService.updateTreasury(updatedBalance);
+        otherIncomeRepository.delete(deletedOtherIncome);
+        return mapToResponse(deletedOtherIncome);
     }
 
 }

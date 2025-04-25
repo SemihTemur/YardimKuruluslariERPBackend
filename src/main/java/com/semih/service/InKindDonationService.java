@@ -1,8 +1,11 @@
 package com.semih.service;
 
 import com.semih.dto.request.InKindDonationRequest;
+import com.semih.dto.response.BaseResponse;
 import com.semih.dto.response.CategoryUnitItemResponse;
 import com.semih.dto.response.InKindDonationResponse;
+import com.semih.exception.NegativeStockException;
+import com.semih.exception.NotFoundException;
 import com.semih.model.Category;
 import com.semih.model.InKindDonation;
 import com.semih.model.Inventory;
@@ -28,34 +31,34 @@ public class InKindDonationService {
         this.inventoryService = inventoryService;
     }
 
-    private InKindDonation mapDtoToEntity(InKindDonationRequest inKindDonationRequest) {
+    private InKindDonation mapToEntity(InKindDonationRequest inKindDonationRequest) {
         return new InKindDonation(
-                donorService.getDonorByFirstNameAndLastName(inKindDonationRequest.getDonorFirstName(), inKindDonationRequest.getDonorLastName()),
-                categoryService.getCategoryByItemName(inKindDonationRequest.getCategory().getItemName()),
-                inKindDonationRequest.getQuantity()
+                donorService.getDonorByFirstNameAndLastName(inKindDonationRequest.donorFirstName(), inKindDonationRequest.donorLastName()),
+                categoryService.getCategoryByItemName(inKindDonationRequest.category().itemName()),
+                inKindDonationRequest.quantity()
         );
     }
 
-    private InKindDonationResponse mapEntityToResponse(InKindDonation inKindDonation) {
+    private InKindDonationResponse mapToResponse(InKindDonation inKindDonation) {
         return new InKindDonationResponse(
-                inKindDonation.getId(),
-                inKindDonation.getCreatedDate(),
-                inKindDonation.getModifiedDate(),
+                new BaseResponse(inKindDonation.getId(),
+                        inKindDonation.getCreatedDate(),
+                        inKindDonation.getModifiedDate()),
                 inKindDonation.getDonor().getFirstName(),
                 inKindDonation.getDonor().getLastName(),
-                mapCategoryToCategoryResponse(inKindDonation.getCategory()),
+                mapToCategoryResponse(inKindDonation.getCategory()),
                 inKindDonation.getQuantity()
         );
     }
 
-    private CategoryUnitItemResponse mapCategoryToCategoryResponse(Category category) {
+    private CategoryUnitItemResponse mapToCategoryResponse(Category category) {
         return new CategoryUnitItemResponse(
                 category.getItemName(),
                 category.getUnit()
         );
     }
 
-    private Inventory mapEntityToInventory(InKindDonation inKindDonation) {
+    private Inventory mapToInventory(InKindDonation inKindDonation) {
         return new Inventory(
                 inKindDonation.getCategory().getItemName(),
                 inKindDonation.getQuantity(),
@@ -63,23 +66,24 @@ public class InKindDonationService {
         );
     }
 
-    public void saveInKindDonation(InKindDonationRequest inKindDonationRequest) {
-        InKindDonation inKindDonation = mapDtoToEntity(inKindDonationRequest);
-        Inventory inventory = mapEntityToInventory(inKindDonation);
+    public InKindDonationResponse saveInKindDonation(InKindDonationRequest inKindDonationRequest) {
+        InKindDonation inKindDonation = mapToEntity(inKindDonationRequest);
+        Inventory inventory = mapToInventory(inKindDonation);
         inventoryService.saveInventory(inventory);
-        inKindDonationRepository.save(inKindDonation);
+        inKindDonation = inKindDonationRepository.save(inKindDonation);
+        return mapToResponse(inKindDonation);
     }
 
-    public List<InKindDonationResponse> getInKindDonations() {
+    public List<InKindDonationResponse> getInKindDonationList() {
         return inKindDonationRepository.findAll()
                 .stream()
-                .map(this::mapEntityToResponse)
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
-    public void updateInKindDonationById(Long id, InKindDonationRequest inKindDonationRequest) {
+    public InKindDonationResponse updateInKindDonationById(Long id, InKindDonationRequest inKindDonationRequest) {
         InKindDonation savedInKindDonation = inKindDonationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Bağış Bulunamadi"));
+                .orElseThrow(() -> new NotFoundException("Ayni bağış bulunamadı!!!"));
 
         // Envanteri getir
         Inventory inventory = inventoryService.getInventory(savedInKindDonation.getCategory().getItemName());
@@ -97,7 +101,7 @@ public class InKindDonationService {
         Integer quantity = savedInKindDonation.getQuantity();
 
         // gelen miktarı al
-        Integer receivedQuantity = inKindDonationRequest.getQuantity();
+        Integer receivedQuantity = inKindDonationRequest.quantity();
 
         //farkı al
         int difference = receivedQuantity - quantity;
@@ -112,7 +116,7 @@ public class InKindDonationService {
             }
             // null ise yani önceden silinmiş sonra değerı arttırılmıssa urununn envanterde yenıden olustur dıyorum
             else {
-                Inventory newInventory = mapEntityToInventory(savedInKindDonation);
+                Inventory newInventory = mapToInventory(savedInKindDonation);
                 newInventory.setQuantity(updatedQuantity);
                 inventoryService.saveInventory(newInventory);
             }
@@ -120,23 +124,23 @@ public class InKindDonationService {
         } else if (currentQuantity + difference == 0) {
             inventoryService.deleteInventory(inventory);
         } else {
-            throw new RuntimeException("Envanter yok");
+            throw new NotFoundException("Envanter bulunamadı!!!");
         }
 
-        InKindDonation updatedInKindDonation = mapDtoToEntity(inKindDonationRequest);
+        InKindDonation updatedInKindDonation = mapToEntity(inKindDonationRequest);
         updatedInKindDonation.setQuantity(receivedQuantity);
         updatedInKindDonation.setId(id);
         updatedInKindDonation.setCreatedDate(savedInKindDonation.getCreatedDate());
-        inKindDonationRepository.save(updatedInKindDonation);
-
+        updatedInKindDonation = inKindDonationRepository.save(updatedInKindDonation);
+        return mapToResponse(updatedInKindDonation);
     }
 
     @Transactional
-    public void deleteInKindDonationById(Long id) {
-        InKindDonation inKindDonation = inKindDonationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Bulunamadi"));
+    public InKindDonationResponse deleteInKindDonationById(Long id) {
+        InKindDonation deletedInKindDonation = inKindDonationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Ayni bağış bulunamadi!!!" + id));
 
-        String itemName = inKindDonation.getCategory().getItemName();
+        String itemName = deletedInKindDonation.getCategory().getItemName();
 
         // Envanter nesnesini al.
         Inventory inventory = inventoryService.getInventory(itemName);
@@ -146,7 +150,7 @@ public class InKindDonationService {
             Integer totalQuantity = inventory.getQuantity();
 
             // Miktarı al
-            Integer quantity = inKindDonation.getQuantity();
+            Integer quantity = deletedInKindDonation.getQuantity();
 
             // değeri güncelle
             int updatedQuantity = totalQuantity - quantity;
@@ -159,7 +163,7 @@ public class InKindDonationService {
                 // Envanterdende sil dıyorum.
                 inventoryService.deleteInventory(inventory);
             } else if (updatedQuantity < 0) {
-                throw new RuntimeException("Silinemedi");
+                throw new NegativeStockException("Stoktaki ürün miktarı 0'ın altına düşemez!!!");
             }
 
             //değer pozitif ise sadece güncelle
@@ -168,7 +172,8 @@ public class InKindDonationService {
             }
         }
 
-        inKindDonationRepository.delete(inKindDonation);
+        inKindDonationRepository.delete(deletedInKindDonation);
+        return mapToResponse(deletedInKindDonation);
     }
 
 }

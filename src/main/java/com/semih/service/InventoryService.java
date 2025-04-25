@@ -1,9 +1,9 @@
 package com.semih.service;
 
+import com.semih.dto.response.BaseResponse;
 import com.semih.dto.response.InventoryResponse;
 import com.semih.model.Inventory;
 import com.semih.repository.InventoryRepository;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,14 +15,15 @@ public class InventoryService {
 
     private final InventoryRepository inventoryRepository;
 
-
     public InventoryService(InventoryRepository inventoryRepository) {
         this.inventoryRepository = inventoryRepository;
     }
 
-    private InventoryResponse mapEntityToResponse(Inventory inventory){
+    private InventoryResponse mapToResponse(Inventory inventory) {
         return new InventoryResponse(
-                inventory.getId(),
+                new BaseResponse(inventory.getId(),
+                        inventory.getCreatedDate(),
+                        inventory.getModifiedDate()),
                 inventory.getProductName(),
                 inventory.getQuantity(),
                 inventory.getUnit()
@@ -47,12 +48,13 @@ public class InventoryService {
         inventoryRepository.save(updatedInventory);
     }
 
-    public List<InventoryResponse> getAllInventory() {
-        return inventoryRepository.findAll().stream().map(this::mapEntityToResponse).collect(Collectors.toList());
+    public List<InventoryResponse> getInventoryList() {
+        return inventoryRepository.findAll().stream().map(this::mapToResponse).collect(Collectors.toList());
     }
 
     public Inventory getInventory(String productName) {
-        return inventoryRepository.findByProductName(productName).orElse(null);
+        return inventoryRepository.findByProductName(productName)
+                .orElse(null);
     }
 
     public void deleteInventory(Inventory inventory) {

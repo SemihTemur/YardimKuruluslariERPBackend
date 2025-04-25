@@ -1,19 +1,11 @@
 package com.semih.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "log")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class Log {
 
     @Id
@@ -38,5 +30,73 @@ public class Log {
     @Column
     private String amountDescription; // Para ile ilgili açıklama (Opsiyonel, örn: "Kasadan 2000 TL düşüldü")
 
+    public Log() {
+    }
+
+    public Log(Long id, String actionType, String targetEntity, String performedByUser, LocalDateTime actionDate, Double amount, String amountDescription) {
+        this.id = id;
+        this.actionType = actionType;
+        this.targetEntity = targetEntity;
+        this.performedByUser = performedByUser;
+        this.actionDate = actionDate;
+        this.amount = amount;
+        this.amountDescription = amountDescription;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getActionType() {
+        return actionType;
+    }
+
+    public void setActionType(String actionType) {
+        this.actionType = actionType;
+    }
+
+    public String getTargetEntity() {
+        return targetEntity;
+    }
+
+    public void setTargetEntity(String targetEntity) {
+        this.targetEntity = targetEntity;
+    }
+
+    public String getPerformedByUser() {
+        return performedByUser;
+    }
+
+    public void setPerformedByUser(String performedByUser) {
+        this.performedByUser = performedByUser;
+    }
+
+    public LocalDateTime getActionDate() {
+        return actionDate;
+    }
+
+    public void setActionDate(LocalDateTime actionDate) {
+        this.actionDate = actionDate;
+    }
+
+    public Double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Double amount) {
+        this.amount = amount;
+    }
+
+    public String getAmountDescription() {
+        return amountDescription;
+    }
+
+    public void setAmountDescription(String amountDescription) {
+        this.amountDescription = amountDescription;
+    }
 }
 

@@ -1,7 +1,10 @@
 package com.semih.service;
 
 import com.semih.dto.request.OtherExpenseRequest;
+import com.semih.dto.response.BaseResponse;
 import com.semih.dto.response.OtherExpenseResponse;
+import com.semih.exception.InsufficientBalanceException;
+import com.semih.exception.NotFoundException;
 import com.semih.model.OtherExpense;
 import com.semih.repository.OtherExpenseRepository;
 import org.springframework.stereotype.Service;
@@ -23,60 +26,63 @@ public class OtherExpenseService {
         this.currencyRateService = currencyRateService;
     }
 
-    public OtherExpense mapDtoToEntity(OtherExpenseRequest otherExpenseRequest) {
+    public OtherExpense mapToEntity(OtherExpenseRequest otherExpenseRequest) {
         return new OtherExpense(
-                otherExpenseRequest.getDescription(),
-                otherExpenseRequest.getAmount(),
-                otherExpenseRequest.getCurrency()
+                otherExpenseRequest.description(),
+                otherExpenseRequest.amount(),
+                otherExpenseRequest.currency()
         );
     }
 
-    public OtherExpenseResponse mapEntityToResponse(OtherExpense otherExpense) {
+    public OtherExpenseResponse mapToResponse(OtherExpense otherExpense) {
         return new OtherExpenseResponse(
-                otherExpense.getId(),
-                otherExpense.getCreatedDate(),
-                otherExpense.getModifiedDate(),
+                new BaseResponse(otherExpense.getId(),
+                        otherExpense.getCreatedDate(),
+                        otherExpense.getModifiedDate()),
                 otherExpense.getDescription(),
                 otherExpense.getAmount(),
                 otherExpense.getCurrency()
         );
     }
 
-
-    public void saveOtherExpense(OtherExpenseRequest otherExpenseRequest) {
-        OtherExpense otherExpense = mapDtoToEntity(otherExpenseRequest);
+    public OtherExpenseResponse saveOtherExpense(OtherExpenseRequest otherExpenseRequest) {
+        OtherExpense savedOtherExpense = mapToEntity(otherExpenseRequest);
 
         // gelen Parayi Try çevir, kasadaki para ile kontrol etmek için
-        BigDecimal amountTry = currencyRateService.convertToTry(String.valueOf(otherExpense.getCurrency()), otherExpense.getAmount());
+        BigDecimal amountTry = currencyRateService.convertToTry(String.valueOf(savedOtherExpense.getCurrency()),
+                savedOtherExpense.getAmount());
 
         // Kasadaki mevcut bakiyeyi al
         BigDecimal cashBalance = treasuryService.getTreasuryBalance();
 
         // eğer kasadaki para gider parasından büyükse kasadaki parayı azalt.
-        if (cashBalance.compareTo(amountTry) >= 0) {
-            BigDecimal updatedAmount = cashBalance.subtract(amountTry);
-            treasuryService.updateTreasury(updatedAmount);
-
-            otherExpenseRepository.save(otherExpense);
-        } else {
-            System.out.println("Kasada bu kadar para yoktur");
+        if (cashBalance.compareTo(amountTry) < 0) {
+            throw new InsufficientBalanceException("İşlem gerçekleştirilemedi. Kasadaki mevcut miktar yeterli değil!!!");
         }
+        BigDecimal updatedAmount = cashBalance.subtract(amountTry);
+        treasuryService.updateTreasury(updatedAmount);
+
+        savedOtherExpense = otherExpenseRepository.save(savedOtherExpense);
+        return mapToResponse(savedOtherExpense);
     }
 
-    public List<OtherExpenseResponse> getAllOtherExpenses() {
+    public List<OtherExpenseResponse> getOtherExpenseList() {
         return otherExpenseRepository.findAll()
                 .stream()
-                .map(this::mapEntityToResponse)
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
-    public void updateOtherExpenseById(Long id, OtherExpenseRequest otherExpenseRequest) {
-        OtherExpense existingOtherExpense = otherExpenseRepository.findById(id).orElseThrow(() -> new RuntimeException("Bulunamadi"));
+    public OtherExpenseResponse updateOtherExpenseById(Long id, OtherExpenseRequest otherExpenseRequest) {
+        OtherExpense existingOtherExpense = otherExpenseRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Diğer gider bulunamadı!!!"));
         // Var olan kayıttaki parayı try çeviriyorum.
-        BigDecimal existingAmountTry = currencyRateService.convertToTry(String.valueOf(existingOtherExpense.getCurrency()), existingOtherExpense.getAmount());
+        BigDecimal existingAmountTry = currencyRateService
+                .convertToTry(String.valueOf(existingOtherExpense.getCurrency()), existingOtherExpense.getAmount());
 
         // gelen parayı try çevir
-        BigDecimal receivedAmountTry = currencyRateService.convertToTry(String.valueOf(otherExpenseRequest.getCurrency()), otherExpenseRequest.getAmount());
+        BigDecimal receivedAmountTry = currencyRateService
+                .convertToTry(String.valueOf(otherExpenseRequest.currency()), otherExpenseRequest.amount());
 
         // kasadaki miktarı al
         BigDecimal cashBalance = treasuryService.getTreasuryBalance();
@@ -89,31 +95,34 @@ public class OtherExpenseService {
             // farkı mevcut bakiyenin üzerine ekle
             treasuryService.updateTreasury(cashBalance.add(difference));
         } else {
-            throw new RuntimeException("Yetersiz bakiye.");
+            throw new InsufficientBalanceException("İşlem gerçekleştirilemedi. Kasadaki mevcut miktar yeterli değil!!!");
         }
 
         // güncellenen değeri veritabanına kaydediyorum.
-        OtherExpense updatedOtherExpense = mapDtoToEntity(otherExpenseRequest);
+        OtherExpense updatedOtherExpense = mapToEntity(otherExpenseRequest);
 
         //bunlar map'lendiği için yeni değer oluşuyor.ben ise guncelleme yapıcagım ıcın id'yi setlıyorum.
         updatedOtherExpense.setId(id);
         updatedOtherExpense.setCreatedDate(existingOtherExpense.getCreatedDate());
 
-        otherExpenseRepository.save(updatedOtherExpense);
-
+        updatedOtherExpense = otherExpenseRepository.save(updatedOtherExpense);
+        return mapToResponse(updatedOtherExpense);
     }
 
-    public void deleteOtherExpenseById(Long id) {
+    public OtherExpenseResponse deleteOtherExpenseById(Long id) {
         // silmeden önce para miktarını al
-        OtherExpense existingOtherExpense = otherExpenseRepository.findById(id).orElseThrow(() -> new RuntimeException("Bulunamadi"));
-        BigDecimal existingAmountTry = currencyRateService.convertToTry(String.valueOf(existingOtherExpense.getCurrency()), existingOtherExpense.getAmount());
+        OtherExpense deletedOtherExpense = otherExpenseRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Diğer gider bulunamadı!!!"));
+        BigDecimal existingAmountTry = currencyRateService
+                .convertToTry(String.valueOf(deletedOtherExpense.getCurrency()), deletedOtherExpense.getAmount());
 
         // kasadaki para miktarini al
         BigDecimal cashBalance = treasuryService.getTreasuryBalance();
 
         treasuryService.updateTreasury(cashBalance.add(existingAmountTry));
 
-        otherExpenseRepository.delete(existingOtherExpense);
+        otherExpenseRepository.delete(deletedOtherExpense);
+        return mapToResponse(deletedOtherExpense);
     }
 
 }

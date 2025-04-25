@@ -1,23 +1,9 @@
 package com.semih.dto.response;
 
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
-public class AddressResponse {
-
-    private String city;
-
-    private String district;
-
-    private String neighborhood;
-
-    private String street;
+public record AddressResponse(String city,
+                              String district,
+                              String neighborhood,
+                              String street
+) {
 
 }

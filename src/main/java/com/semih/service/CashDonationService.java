@@ -1,7 +1,10 @@
 package com.semih.service;
 
 import com.semih.dto.request.CashDonationRequest;
+import com.semih.dto.response.BaseResponse;
 import com.semih.dto.response.CashDonationResponse;
+import com.semih.exception.InsufficientBalanceException;
+import com.semih.exception.NotFoundException;
 import com.semih.model.CashDonation;
 import com.semih.repository.CashDonationRepository;
 import org.springframework.stereotype.Service;
@@ -25,19 +28,19 @@ public class CashDonationService {
         this.treasuryService = treasuryService;
     }
 
-    private CashDonation mapDtoToEntity(CashDonationRequest cashDonationRequest) {
+    private CashDonation mapToEntity(CashDonationRequest cashDonationRequest) {
         CashDonation cashDonation = new CashDonation();
-        cashDonation.setDonor(donorService.getDonorByFirstNameAndLastName(cashDonationRequest.getDonorFirstName(), cashDonationRequest.getDonorLastName()));
-        cashDonation.setAmount(cashDonationRequest.getAmount());
-        cashDonation.setCurrency(cashDonationRequest.getCurrency());
+        cashDonation.setDonor(donorService.getDonorByFirstNameAndLastName(cashDonationRequest.donorFirstName(), cashDonationRequest.donorLastName()));
+        cashDonation.setAmount(cashDonationRequest.amount());
+        cashDonation.setCurrency(cashDonationRequest.currency());
         return cashDonation;
     }
 
-    private CashDonationResponse mapEntityToResponse(CashDonation cashDonation) {
+    private CashDonationResponse mapToResponse(CashDonation cashDonation) {
         return new CashDonationResponse(
-                cashDonation.getId(),
-                cashDonation.getCreatedDate(),
-                cashDonation.getModifiedDate(),
+                new BaseResponse(cashDonation.getId(),
+                        cashDonation.getCreatedDate(),
+                        cashDonation.getModifiedDate()),
                 cashDonation.getDonor().getFirstName(),
                 cashDonation.getDonor().getLastName(),
                 cashDonation.getAmount(),
@@ -45,11 +48,11 @@ public class CashDonationService {
         );
     }
 
-
-    public void saveCashDonation(CashDonationRequest cashDonationRequest) {
-        CashDonation cashDonation = mapDtoToEntity(cashDonationRequest);
+    public CashDonationResponse saveCashDonation(CashDonationRequest cashDonationRequest) {
+        CashDonation cashDonation = mapToEntity(cashDonationRequest);
         // Gelen para'yı try çevir.
-        BigDecimal amountTry = currencyRateService.convertToTry(String.valueOf(cashDonation.getCurrency()), cashDonation.getAmount());
+        BigDecimal amountTry = currencyRateService
+                .convertToTry(String.valueOf(cashDonation.getCurrency()), cashDonation.getAmount());
 
         // Kasadaki mevcut miktarı al
         BigDecimal cashBalance = treasuryService.getTreasuryBalance();
@@ -59,23 +62,27 @@ public class CashDonationService {
         // Kasadaki parayı gğncelle
         treasuryService.updateTreasury(updatedBalance);
 
-        cashDonationRepository.save(cashDonation);
+        CashDonation savedCashDonation = cashDonationRepository.save(cashDonation);
+        return mapToResponse(savedCashDonation);
     }
 
-    public List<CashDonationResponse> getAllCashDonations() {
+    public List<CashDonationResponse> getCashDonationList() {
         return cashDonationRepository.findAll().stream()
-                .map(this::mapEntityToResponse)
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
-    public void updateCashDonationById(Long id, CashDonationRequest cashDonationRequest) {
+    public CashDonationResponse updateCashDonationById(Long id, CashDonationRequest cashDonationRequest) {
         // var olan kaydı al
-        CashDonation existingCashDonation = cashDonationRepository.findById(id).orElseThrow(() -> new RuntimeException("cashDonation not found"));
+        CashDonation existingCashDonation = cashDonationRepository
+                .findById(id).orElseThrow(() -> new NotFoundException("Nakdi bağış bulunamadı!!!"));
         // try çevir.
-        BigDecimal existingAmountTry = currencyRateService.convertToTry(String.valueOf(existingCashDonation.getCurrency()), existingCashDonation.getAmount());
+        BigDecimal existingAmountTry = currencyRateService
+                .convertToTry(String.valueOf(existingCashDonation.getCurrency()), existingCashDonation.getAmount());
 
         // gelen değeri try çevir
-        BigDecimal amountTry = currencyRateService.convertToTry(String.valueOf(cashDonationRequest.getCurrency()), cashDonationRequest.getAmount());
+        BigDecimal amountTry = currencyRateService
+                .convertToTry(String.valueOf(cashDonationRequest.currency()), cashDonationRequest.amount());
 
         // kasadaki bakiyeyi al
         BigDecimal cashBalance = treasuryService.getTreasuryBalance();
@@ -86,20 +93,23 @@ public class CashDonationService {
             BigDecimal updatedBalance = cashBalance.add(difference);
             treasuryService.updateTreasury(updatedBalance);
         } else {
-            throw new RuntimeException("Yetersiz Bakiye");
+            throw new InsufficientBalanceException("İşlem gerçekleştirilemedi. Kasadaki mevcut miktar yeterli değil!!!");
         }
 
-        CashDonation updatedCashDonation = mapDtoToEntity(cashDonationRequest);
+        CashDonation updatedCashDonation = mapToEntity(cashDonationRequest);
         updatedCashDonation.setId(id);
         updatedCashDonation.setCreatedDate(existingCashDonation.getCreatedDate());
-        cashDonationRepository.save(updatedCashDonation);
+        updatedCashDonation = cashDonationRepository.save(updatedCashDonation);
+        return mapToResponse(updatedCashDonation);
     }
 
-    public void deleteCashDonationById(Long id) {
+    public CashDonationResponse deleteCashDonationById(Long id) {
         // var olan kaydı al
-        CashDonation existingCashDonation = cashDonationRepository.findById(id).orElseThrow(() -> new RuntimeException("cashDonation not found"));
+        CashDonation deletedCashDonation = cashDonationRepository
+                .findById(id).orElseThrow(() -> new NotFoundException("Nakdi bağış bulunamadı!!!" + id));
         // parayı try çevir
-        BigDecimal amountTry = currencyRateService.convertToTry(String.valueOf(existingCashDonation.getCurrency()), existingCashDonation.getAmount());
+        BigDecimal amountTry = currencyRateService
+                .convertToTry(String.valueOf(deletedCashDonation.getCurrency()), deletedCashDonation.getAmount());
 
         BigDecimal cashBalance = treasuryService.getTreasuryBalance();
         BigDecimal updatedBalance = cashBalance.subtract(amountTry);
@@ -107,11 +117,12 @@ public class CashDonationService {
         if (updatedBalance.compareTo(BigDecimal.ZERO) >= 0) {
             treasuryService.updateTreasury(updatedBalance);
 
-            cashDonationRepository.delete(existingCashDonation);
+            cashDonationRepository.delete(deletedCashDonation);
         } else {
-            throw new RuntimeException("Yetersiz Bakiye");
+            throw new InsufficientBalanceException("İşlem gerçekleştirilemedi. Kasadaki mevcut miktar yeterli değil!!!");
         }
 
+        return mapToResponse(deletedCashDonation);
     }
 
 }

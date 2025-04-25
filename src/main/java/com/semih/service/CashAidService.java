@@ -1,8 +1,11 @@
 package com.semih.service;
 
 import com.semih.dto.request.CashAidRequest;
+import com.semih.dto.response.BaseResponse;
 import com.semih.dto.response.CashAidExpenseResponse;
 import com.semih.dto.response.CashAidResponse;
+import com.semih.exception.InsufficientBalanceException;
+import com.semih.exception.NotFoundException;
 import com.semih.model.CashAid;
 import com.semih.repository.CashAidRepository;
 import com.semih.utils.HelperUtils;
@@ -30,24 +33,25 @@ public class CashAidService {
         this.treasuryService = treasuryService;
     }
 
-    public CashAid mapDtoToEntity(CashAidRequest cashAidRequest) {
+    //  Mappers
+    public CashAid mapToEntity(CashAidRequest cashAidRequest) {
         CashAid cashAid = new CashAid();
 
         // gelen Aile'yi buluyorum isme göre.
-        cashAid.setFamily(familyService.getFamilyByName(cashAidRequest.getFamilyName()));
+        cashAid.setFamily(familyService.getFamilyByName(cashAidRequest.familyName()));
 
-        cashAid.setAidAmount(cashAidRequest.getAidAmount());
-        cashAid.setCurrency(cashAidRequest.getCurrency());
-        cashAid.setPeriod(cashAidRequest.getPeriod());
-        cashAid.setDuration(cashAidRequest.getDuration());
+        cashAid.setAidAmount(cashAidRequest.aidAmount());
+        cashAid.setCurrency(cashAidRequest.currency());
+        cashAid.setPeriod(cashAidRequest.period());
+        cashAid.setDuration(cashAidRequest.duration());
         return cashAid;
     }
 
-    public CashAidResponse mapEntityToResponse(CashAid cashAid) {
+    public CashAidResponse mapToResponse(CashAid cashAid) {
         return new CashAidResponse(
-                cashAid.getId(),
-                cashAid.getCreatedDate(),
-                cashAid.getModifiedDate(),
+                new BaseResponse(cashAid.getId(),
+                        cashAid.getCreatedDate(),
+                        cashAid.getModifiedDate()),
                 cashAid.getFamily().getFamilyName(),
                 cashAid.getAidAmount(),
                 cashAid.getCurrency(),
@@ -59,31 +63,36 @@ public class CashAidService {
         );
     }
 
-    private CashAidExpenseResponse mapEntityToExpenseResponse(CashAid cashAid) {
+    private CashAidExpenseResponse mapToExpenseResponse(CashAid cashAid) {
         return new CashAidExpenseResponse(
+                new BaseResponse(cashAid.getId(),
+                        cashAid.getCreatedDate(),
+                        cashAid.getModifiedDate()),
                 cashAid.getFamily().getFamilyName(),
                 cashAid.getTotalDonatedAmount(),
                 cashAid.getCurrency()
         );
     }
 
-    public void saveCashAid(CashAidRequest cashAidRequest) {
+    // Save
+    public CashAidResponse saveCashAid(CashAidRequest cashAidRequest) {
         // toplam parayı almak için bazı bilgileri alıyorum
-        BigDecimal aidAmount = cashAidRequest.getAidAmount();
-        Integer duration = cashAidRequest.getDuration();
+        BigDecimal aidAmount = cashAidRequest.aidAmount();
+        Integer duration = cashAidRequest.duration();
 
         // toplam parayı al
         BigDecimal totalAidAmount = helperUtils.calculateTotalDonatedAmount(aidAmount, duration);
 
         // toplam parayı try çevir
-        BigDecimal totalAidAmountTry = currencyRateService.convertToTry(String.valueOf(cashAidRequest.getCurrency()), totalAidAmount);
+        BigDecimal totalAidAmountTry = currencyRateService
+                .convertToTry(String.valueOf(cashAidRequest.currency()), totalAidAmount);
 
         BigDecimal cashBalance = treasuryService.getTreasuryBalance();
 
         // eğer kasadaki para miktari daha büyük ise toplam bağışlancak mıktardan,
         // çevirme ve kaydetme işlemlerini yapıyorum.
         if (cashBalance.compareTo(totalAidAmountTry) >= 0) {
-            CashAid cashAid = mapDtoToEntity(cashAidRequest);
+            CashAid cashAid = mapToEntity(cashAidRequest);
             cashAid.setTotalDonatedAmount(totalAidAmount);
 
             LocalDate today = LocalDate.now();
@@ -99,41 +108,47 @@ public class CashAidService {
 
             treasuryService.updateTreasury(updatedCashBalance);
 
-            cashAidRepository.save(cashAid);
+            CashAid savedCashAid = cashAidRepository.save(cashAid);
+            return mapToResponse(savedCashAid);
         } else {
-            throw new RuntimeException("Yetersiz Bakiye");
+            throw new InsufficientBalanceException("İşlem gerçekleştirilemedi. Kasadaki mevcut miktar yeterli değil!!!");
         }
     }
 
-    public List<CashAidResponse> getAllCashAid() {
+    // List
+    public List<CashAidResponse> getCashAidList() {
         return cashAidRepository.findAll().stream()
-                .map(this::mapEntityToResponse)
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     public List<CashAidExpenseResponse> getAllCashAidExpense() {
         return cashAidRepository.findAll().stream()
-                .map(this::mapEntityToExpenseResponse)
+                .map(this::mapToExpenseResponse)
                 .collect(Collectors.toList());
     }
 
-    public void updateCashAidById(Long id, CashAidRequest cashAidRequest) {
+    // update
+    public CashAidResponse updateCashAidById(Long id, CashAidRequest cashAidRequest) {
         // Güncellenecek olan nesneyi ve toplam bağışlanan parayı alıyorum.
-        CashAid existingCashAid = cashAidRepository.findById(id).orElseThrow(() -> new RuntimeException("Bulunamadi"));
+        CashAid existingCashAid = cashAidRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Nakdi yardım bulunamadı!!!" + id));
         BigDecimal totalDonatedAidAmount = existingCashAid.getTotalDonatedAmount();
 
         //  şimdi toplam parayı Try'ye cevırmek kaldı.
         String currencyType = String.valueOf(existingCashAid.getCurrency());
         BigDecimal totalDonatedAidAmountTRY = currencyRateService.convertToTry(currencyType, totalDonatedAidAmount);
 
-        BigDecimal receivedAmount = cashAidRequest.getAidAmount();
-        Integer receivedDuration = cashAidRequest.getDuration();
+        BigDecimal receivedAmount = cashAidRequest.aidAmount();
+        Integer receivedDuration = cashAidRequest.duration();
 
         // gelen toplam parayı hesaplayalım.
-        BigDecimal receivedTotalDonatedAidAmount = helperUtils.calculateTotalDonatedAmount(receivedAmount, receivedDuration);
+        BigDecimal receivedTotalDonatedAidAmount = helperUtils
+                .calculateTotalDonatedAmount(receivedAmount, receivedDuration);
 
         // gelen toplam parayı TRY çevirelim.
-        BigDecimal receivedTotalDonatedAidAmountTRY = currencyRateService.convertToTry(String.valueOf(cashAidRequest.getCurrency()), receivedTotalDonatedAidAmount);
+        BigDecimal receivedTotalDonatedAidAmountTRY = currencyRateService
+                .convertToTry(String.valueOf(cashAidRequest.currency()), receivedTotalDonatedAidAmount);
 
         BigDecimal cashBalance = treasuryService.getTreasuryBalance();
 
@@ -147,34 +162,37 @@ public class CashAidService {
             updatedCashBalance = cashBalance.add(difference);
         } else {
             // hata fırlatıcam burda
-            throw new RuntimeException("Yetersiz Bakiye");
+            throw new InsufficientBalanceException("İşlem gerçekleştirilemedi. Kasadaki mevcut miktar yeterli değil!!!");
         }
 
         // gelen yeni nesneyı entity'e çeviriyorum
-        CashAid uptadedCashAid = mapDtoToEntity(cashAidRequest);
-        uptadedCashAid.setId(id);
-        uptadedCashAid.setTotalDonatedAmount(receivedTotalDonatedAidAmount);
-        uptadedCashAid.setCreatedDate(existingCashAid.getCreatedDate());
+        CashAid updatedCashAid = mapToEntity(cashAidRequest);
+        updatedCashAid.setId(id);
+        updatedCashAid.setTotalDonatedAmount(receivedTotalDonatedAidAmount);
+        updatedCashAid.setCreatedDate(existingCashAid.getCreatedDate());
 
         // başlangıç değerine göre ve gelen değere göre son tarihi guncellıyorum
         LocalDate receivedDate = existingCashAid.getStartingDate();
-        uptadedCashAid.setStartingDate(receivedDate);
-        String receivedPeriodType = String.valueOf(uptadedCashAid.getPeriod());
+        updatedCashAid.setStartingDate(receivedDate);
+        String receivedPeriodType = String.valueOf(updatedCashAid.getPeriod());
         LocalDate endDate = helperUtils.determineEndingDate(receivedPeriodType, receivedDuration, receivedDate);
-        uptadedCashAid.setEndingDate(endDate);
+        updatedCashAid.setEndingDate(endDate);
 
         // kasadaki para mıktarını azaltıp verıtabanında guncellıyorum;
         treasuryService.updateTreasury(updatedCashBalance);
 
-        cashAidRepository.save(uptadedCashAid);
+        updatedCashAid = cashAidRepository.save(updatedCashAid);
+        return mapToResponse(updatedCashAid);
     }
 
-    public void deleteCashAidById(Long id) {
-        CashAid cashAid = cashAidRepository.findById(id).orElseThrow(() -> new RuntimeException("Bulunamadi"));
-        BigDecimal totalDonatedAmount = cashAid.getTotalDonatedAmount();
+    public CashAidResponse deleteCashAidById(Long id) {
+        CashAid deletedCashAid = cashAidRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Nakdi yardım bulunamadı!!!" + id));
+        BigDecimal totalDonatedAmount = deletedCashAid.getTotalDonatedAmount();
 
         // kayıtlı olan toplam miktari tl'ye çeviriyorum.
-        BigDecimal totalDonatedAmountTry = currencyRateService.convertToTry(cashAid.getCurrency().toString(), totalDonatedAmount);
+        BigDecimal totalDonatedAmountTry = currencyRateService
+                .convertToTry(deletedCashAid.getCurrency().toString(), totalDonatedAmount);
 
         // kasadaki parayı alıyorum.
         BigDecimal cashBalance = treasuryService.getTreasuryBalance();
@@ -182,7 +200,8 @@ public class CashAidService {
 
         treasuryService.updateTreasury(updatedBalance);
 
-        cashAidRepository.delete(cashAid);
+        cashAidRepository.delete(deletedCashAid);
+        return mapToResponse(deletedCashAid);
     }
 
 }

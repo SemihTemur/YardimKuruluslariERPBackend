@@ -2,7 +2,10 @@ package com.semih.controller;
 
 import com.semih.dto.request.InKindDonationRequest;
 import com.semih.dto.response.InKindDonationResponse;
+import com.semih.dto.response.RestResponse;
 import com.semih.service.InKindDonationService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,23 +20,27 @@ public class InKindDonationController {
         this.inKindDonationService = inKindDonationService;
     }
 
-    @PostMapping(path="/saveInKindDonation")
-    public void saveInKindDonation(@RequestBody InKindDonationRequest inKindDonationRequest) {
-        inKindDonationService.saveInKindDonation(inKindDonationRequest);
+    @PostMapping(path = "/saveInKindDonation")
+    public ResponseEntity<RestResponse<InKindDonationResponse>> saveInKindDonation(@RequestBody InKindDonationRequest inKindDonationRequest) {
+        InKindDonationResponse savedInKindDonationResponse = inKindDonationService.saveInKindDonation(inKindDonationRequest);
+        return new ResponseEntity<>(RestResponse.of(savedInKindDonationResponse), HttpStatus.OK);
     }
 
-    @GetMapping(path="/getInKindDonationList")
-    public List<InKindDonationResponse> getInKindDonationList() {
-        return inKindDonationService.getInKindDonations();
+    @GetMapping(path = "/getInKindDonationList")
+    public ResponseEntity<RestResponse<List<InKindDonationResponse>>> getInKindDonationList() {
+        List<InKindDonationResponse> indDonationResponseList = inKindDonationService.getInKindDonationList();
+        return new ResponseEntity<>(RestResponse.of(indDonationResponseList), HttpStatus.OK);
     }
 
-    @PutMapping(path="/updateInKindDonationById/{id}")
-    private void updateInKindDonationById(@PathVariable Long id, @RequestBody InKindDonationRequest inKindDonationRequest) {
-        inKindDonationService.updateInKindDonationById(id, inKindDonationRequest);
+    @PutMapping(path = "/updateInKindDonationById/{id}")
+    private ResponseEntity<RestResponse<InKindDonationResponse>> updateInKindDonationById(@PathVariable Long id, @RequestBody InKindDonationRequest inKindDonationRequest) {
+        InKindDonationResponse updatedInKindDonationResponse = inKindDonationService.updateInKindDonationById(id, inKindDonationRequest);
+        return new ResponseEntity<>(RestResponse.of(updatedInKindDonationResponse), HttpStatus.OK);
     }
 
-    @DeleteMapping(path="/deleteInKindDonationById/{id}")
-    public void deleteInKindDonationById(@PathVariable Long id) {
-        inKindDonationService.deleteInKindDonationById(id);
+    @DeleteMapping(path = "/deleteInKindDonationById/{id}")
+    public ResponseEntity<RestResponse<InKindDonationResponse>> deleteInKindDonationById(@PathVariable Long id) {
+        InKindDonationResponse deletedInKindDonationResponse = inKindDonationService.deleteInKindDonationById(id);
+        return new ResponseEntity<>(RestResponse.of(deletedInKindDonationResponse), HttpStatus.OK);
     }
 }
