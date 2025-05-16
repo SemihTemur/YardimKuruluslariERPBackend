@@ -2,6 +2,7 @@ package com.semih.service;
 
 import com.semih.dto.response.BaseResponse;
 import com.semih.dto.response.InventoryResponse;
+import com.semih.model.Auditable;
 import com.semih.model.Inventory;
 import com.semih.repository.InventoryRepository;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class InventoryService {
         );
     }
 
+    @Auditable(actionType = "Ekledi", targetEntity = "Envanter")
     public void saveInventory(Inventory inventory) {
         Optional<Inventory> savedInventory = inventoryRepository.findByProductName(inventory.getProductName());
 
@@ -44,6 +46,7 @@ public class InventoryService {
         }
     }
 
+    @Auditable(actionType = "Güncelledi", targetEntity = "Envanter")
     public void updateInventory(Inventory updatedInventory) {
         inventoryRepository.save(updatedInventory);
     }
@@ -57,10 +60,11 @@ public class InventoryService {
                 .orElse(null);
     }
 
+    @Auditable(actionType = "Sildi", targetEntity = "Envanter")
     public void deleteInventory(Inventory inventory) {
         inventoryRepository.delete(inventory);
     }
-
+    
     // tür silindiğinde o türe bağlı envanterdekı kaydın sılınmesını saglıyo
     public void deleteInventoryByProductName(String productName) {
         inventoryRepository.deleteByProductName(productName);

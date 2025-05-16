@@ -4,7 +4,9 @@ import com.semih.dto.request.CategoryRequest;
 import com.semih.dto.response.BaseResponse;
 import com.semih.dto.response.CategoryResponse;
 import com.semih.dto.response.CategoryUnitItemResponse;
+import com.semih.exception.ConflictException;
 import com.semih.exception.NotFoundException;
+import com.semih.model.Auditable;
 import com.semih.model.Category;
 import com.semih.repository.CategoryRepository;
 import jakarta.transaction.Transactional;
@@ -41,7 +43,15 @@ public class CategoryService {
         );
     }
 
+    private void validateUniqueness(CategoryRequest categoryRequest) {
+        if (categoryRepository.existsByItemNameAndAndUnit(categoryRequest.itemName(), categoryRequest.unit())) {
+            throw new ConflictException("Bu tür ve birim zaten mevcut!!!");
+        }
+    }
+
+    @Auditable(actionType = "Ekledi", targetEntity = "Kategori")
     public CategoryResponse saveCategory(CategoryRequest categoryRequest) {
+        validateUniqueness(categoryRequest);
         Category savedCategory = categoryRepository.save(mapToEntity(categoryRequest));
         return mapToResponse(savedCategory);
     }
@@ -69,10 +79,12 @@ public class CategoryService {
                 .orElseThrow(() -> new NotFoundException("Kategori bulunamadı!!!" + itemName));
     }
 
+    @Auditable(actionType = "Güncelledi", targetEntity = "Kategori")
     public CategoryResponse updateCategoryById(Long id, CategoryRequest categoryRequest) {
         Category existingCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Kategori bulunamadı!!!" + id));
 
+        validateUniqueness(categoryRequest);
         // 2. Gelen DTO'yu Entity'ye dönüştür
         Category updatedCategory = mapToEntity(categoryRequest);
 
@@ -81,8 +93,10 @@ public class CategoryService {
         updatedCategory.setCreatedDate(existingCategory.getCreatedDate());
         updatedCategory = categoryRepository.save(updatedCategory);
         return mapToResponse(updatedCategory);
+
     }
 
+    @Auditable(actionType = "Sildi", targetEntity = "Kategori")
     @Transactional
     public CategoryResponse deleteCategoryById(Long id) {
         Category deletedCategory = categoryRepository.findById(id)

@@ -14,6 +14,12 @@ public interface FamilyRepository extends JpaRepository<Family, Long> {
 
     Optional<Family> findByFamilyName(String familyName);
 
+    Boolean existsByFamilyName(String familyName);
+
+    Boolean existsByPhoneNumber(String phoneNumber);
+
+    Boolean existsByEmail(String email);
+
     @Query("Select new com.semih.dto.response.FamilyNameResponse(f.familyName) from Family f")
     List<FamilyNameResponse> getFamilyNames();
 }

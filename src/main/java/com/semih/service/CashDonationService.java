@@ -5,6 +5,7 @@ import com.semih.dto.response.BaseResponse;
 import com.semih.dto.response.CashDonationResponse;
 import com.semih.exception.InsufficientBalanceException;
 import com.semih.exception.NotFoundException;
+import com.semih.model.Auditable;
 import com.semih.model.CashDonation;
 import com.semih.repository.CashDonationRepository;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,7 @@ public class CashDonationService {
         );
     }
 
+    @Auditable(actionType = "Ekledi", targetEntity = "Nakdi Bağış")
     public CashDonationResponse saveCashDonation(CashDonationRequest cashDonationRequest) {
         CashDonation cashDonation = mapToEntity(cashDonationRequest);
         // Gelen para'yı try çevir.
@@ -72,6 +74,7 @@ public class CashDonationService {
                 .collect(Collectors.toList());
     }
 
+    @Auditable(actionType = "Güncelledi", targetEntity = "Nakdi Bağış")
     public CashDonationResponse updateCashDonationById(Long id, CashDonationRequest cashDonationRequest) {
         // var olan kaydı al
         CashDonation existingCashDonation = cashDonationRepository
@@ -103,6 +106,7 @@ public class CashDonationService {
         return mapToResponse(updatedCashDonation);
     }
 
+    @Auditable(actionType = "Sildi", targetEntity = "Nakdi Bağış")
     public CashDonationResponse deleteCashDonationById(Long id) {
         // var olan kaydı al
         CashDonation deletedCashDonation = cashDonationRepository

@@ -6,6 +6,7 @@ import com.semih.dto.response.CashAidExpenseResponse;
 import com.semih.dto.response.CashAidResponse;
 import com.semih.exception.InsufficientBalanceException;
 import com.semih.exception.NotFoundException;
+import com.semih.model.Auditable;
 import com.semih.model.CashAid;
 import com.semih.repository.CashAidRepository;
 import com.semih.utils.HelperUtils;
@@ -75,6 +76,7 @@ public class CashAidService {
     }
 
     // Save
+    @Auditable(actionType = "Ekledi", targetEntity = "Ayni Bağış")
     public CashAidResponse saveCashAid(CashAidRequest cashAidRequest) {
         // toplam parayı almak için bazı bilgileri alıyorum
         BigDecimal aidAmount = cashAidRequest.aidAmount();
@@ -129,6 +131,7 @@ public class CashAidService {
     }
 
     // update
+    @Auditable(actionType = "Güncelledi", targetEntity = "Ayni Bağış")
     public CashAidResponse updateCashAidById(Long id, CashAidRequest cashAidRequest) {
         // Güncellenecek olan nesneyi ve toplam bağışlanan parayı alıyorum.
         CashAid existingCashAid = cashAidRepository.findById(id)
@@ -185,6 +188,7 @@ public class CashAidService {
         return mapToResponse(updatedCashAid);
     }
 
+    @Auditable(actionType = "Sildi", targetEntity = "Ayni Bağış")
     public CashAidResponse deleteCashAidById(Long id) {
         CashAid deletedCashAid = cashAidRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Nakdi yardım bulunamadı!!!" + id));

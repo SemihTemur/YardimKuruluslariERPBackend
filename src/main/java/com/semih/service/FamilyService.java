@@ -5,8 +5,10 @@ import com.semih.dto.response.AddressResponse;
 import com.semih.dto.response.BaseResponse;
 import com.semih.dto.response.FamilyNameResponse;
 import com.semih.dto.response.FamilyResponse;
+import com.semih.exception.ConflictException;
 import com.semih.exception.NotFoundException;
 import com.semih.model.Address;
+import com.semih.model.Auditable;
 import com.semih.model.Family;
 import com.semih.repository.FamilyRepository;
 import jakarta.transaction.Transactional;
@@ -59,8 +61,25 @@ public class FamilyService {
         );
     }
 
-    // Post
+    private void validateUniqueness(FamilyRequest familyRequest) {
+        if (familyRepository.existsByFamilyName(familyRequest.familyName())) {
+            throw new ConflictException("Aile adı zaten mevcut!!!");
+        }
+
+        if (familyRepository.existsByPhoneNumber(familyRequest.phoneNumber())) {
+            throw new ConflictException("Telefon numarası zaten mevcut!!!");
+        }
+
+        if (familyRepository.existsByEmail(familyRequest.email())) {
+            throw new ConflictException("Email zaten mevcut!!!");
+        }
+
+    }
+
+
+    @Auditable(actionType = "Ekledi", targetEntity = "Aile")
     public FamilyResponse saveFamily(FamilyRequest familyRequest) {
+        validateUniqueness(familyRequest);
         Family savedFamily = familyRepository.save(mapToEntity(familyRequest));
         return mapToResponse(savedFamily);
     }
@@ -90,10 +109,13 @@ public class FamilyService {
         return familyRepository.getFamilyNames();
     }
 
-    //update
+    @Auditable(actionType = "Güncelledi", targetEntity = "Aile")
     public FamilyResponse updateFamilyById(Long id, FamilyRequest familyRequest) {
         Family existingFamily = familyRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Aile bulunamadı!!!" + id));
+
+        validateUniqueness(familyRequest);
+
         Family updatedFamily = mapToEntity(familyRequest);
         updatedFamily.setId(id);
         updatedFamily.setCreatedDate(existingFamily.getCreatedDate());
@@ -101,7 +123,8 @@ public class FamilyService {
         return mapToResponse(updatedFamily);
     }
 
-    // Delete
+
+    @Auditable(actionType = "Sildi", targetEntity = "Aile")
     @Transactional
     public FamilyResponse deleteFamilyById(Long id) {
         Family deletedFamily = familyRepository.findById(id)
@@ -110,6 +133,7 @@ public class FamilyService {
         return mapToResponse(deletedFamily);
     }
 
+    @Auditable(actionType = "Sildi", targetEntity = "Aile")
     public List<FamilyResponse> deleteAllFamily() {
         List<FamilyResponse> familyResponseList = getFamilyList();
         familyRepository.deleteAll();

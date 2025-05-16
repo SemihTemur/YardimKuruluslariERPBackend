@@ -1,6 +1,8 @@
 package com.semih.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +14,14 @@ public class Log {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column
+    @CreationTimestamp
+    private LocalDateTime createdDate;
+
+    @Column
+    @UpdateTimestamp
+    private LocalDateTime modifiedDate;
+
     @Column(nullable = false)
     private String actionType; // Örneğin: "Oluşturuldu", "Güncellendi", "Silindi"
 
@@ -21,26 +31,16 @@ public class Log {
     @Column(nullable = false)
     private String performedByUser; // İşlemi yapan kullanıcı (Adı veya ID)
 
-    @Column(nullable = false)
-    private LocalDateTime actionDate; // İşlem tarihi ve saati
-
-    @Column
-    private Double amount; // İşlemle ilgili para tutarı (Opsiyonel)
-
-    @Column
-    private String amountDescription; // Para ile ilgili açıklama (Opsiyonel, örn: "Kasadan 2000 TL düşüldü")
-
     public Log() {
     }
 
-    public Log(Long id, String actionType, String targetEntity, String performedByUser, LocalDateTime actionDate, Double amount, String amountDescription) {
+    public Log(Long id, LocalDateTime createdDate, LocalDateTime modifiedDate, String actionType, String targetEntity, String performedByUser) {
         this.id = id;
+        this.createdDate = createdDate;
+        this.modifiedDate = modifiedDate;
         this.actionType = actionType;
         this.targetEntity = targetEntity;
         this.performedByUser = performedByUser;
-        this.actionDate = actionDate;
-        this.amount = amount;
-        this.amountDescription = amountDescription;
     }
 
     public Long getId() {
@@ -49,6 +49,22 @@ public class Log {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public LocalDateTime getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(LocalDateTime createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public LocalDateTime getModifiedDate() {
+        return modifiedDate;
+    }
+
+    public void setModifiedDate(LocalDateTime modifiedDate) {
+        this.modifiedDate = modifiedDate;
     }
 
     public String getActionType() {
@@ -75,28 +91,6 @@ public class Log {
         this.performedByUser = performedByUser;
     }
 
-    public LocalDateTime getActionDate() {
-        return actionDate;
-    }
 
-    public void setActionDate(LocalDateTime actionDate) {
-        this.actionDate = actionDate;
-    }
-
-    public Double getAmount() {
-        return amount;
-    }
-
-    public void setAmount(Double amount) {
-        this.amount = amount;
-    }
-
-    public String getAmountDescription() {
-        return amountDescription;
-    }
-
-    public void setAmountDescription(String amountDescription) {
-        this.amountDescription = amountDescription;
-    }
 }
 

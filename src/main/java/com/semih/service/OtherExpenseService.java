@@ -5,6 +5,7 @@ import com.semih.dto.response.BaseResponse;
 import com.semih.dto.response.OtherExpenseResponse;
 import com.semih.exception.InsufficientBalanceException;
 import com.semih.exception.NotFoundException;
+import com.semih.model.Auditable;
 import com.semih.model.OtherExpense;
 import com.semih.repository.OtherExpenseRepository;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,7 @@ public class OtherExpenseService {
         );
     }
 
+    @Auditable(actionType = "Ekledi", targetEntity = "Diğer Giderler")
     public OtherExpenseResponse saveOtherExpense(OtherExpenseRequest otherExpenseRequest) {
         OtherExpense savedOtherExpense = mapToEntity(otherExpenseRequest);
 
@@ -73,6 +75,7 @@ public class OtherExpenseService {
                 .collect(Collectors.toList());
     }
 
+    @Auditable(actionType = "Güncelledi", targetEntity = "Diğer Giderler")
     public OtherExpenseResponse updateOtherExpenseById(Long id, OtherExpenseRequest otherExpenseRequest) {
         OtherExpense existingOtherExpense = otherExpenseRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Diğer gider bulunamadı!!!"));
@@ -109,6 +112,7 @@ public class OtherExpenseService {
         return mapToResponse(updatedOtherExpense);
     }
 
+    @Auditable(actionType = "Sildi", targetEntity = "Diğer Giderler")
     public OtherExpenseResponse deleteOtherExpenseById(Long id) {
         // silmeden önce para miktarını al
         OtherExpense deletedOtherExpense = otherExpenseRepository.findById(id)

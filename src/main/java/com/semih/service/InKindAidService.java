@@ -6,6 +6,7 @@ import com.semih.dto.response.CategoryResponse;
 import com.semih.dto.response.InKindAidResponse;
 import com.semih.exception.InsufficientInventoryException;
 import com.semih.exception.NotFoundException;
+import com.semih.model.Auditable;
 import com.semih.model.Category;
 import com.semih.model.InKindAid;
 import com.semih.model.Inventory;
@@ -79,6 +80,7 @@ public class InKindAidService {
         );
     }
 
+    @Auditable(actionType = "Ekledi", targetEntity = "Ayni Yardım")
     @Transactional
     public InKindAidResponse saveInKindAid(InKindAidRequest inKindAidRequest) {
         InKindAid inKindAid = mapToEntity(inKindAidRequest);
@@ -122,6 +124,7 @@ public class InKindAidService {
                 .collect(Collectors.toList());
     }
 
+    @Auditable(actionType = "Güncelledi", targetEntity = "Ayni Yardım")
     public InKindAidResponse updateInKindAidById(Long id, InKindAidRequest inKindAidRequest) {
         InKindAid inKindAid = inKindAidRepository.findById(id).
                 orElseThrow(() -> new NotFoundException("Ayni bağış bulunamadı!!!" + id));
@@ -172,6 +175,7 @@ public class InKindAidService {
         return mapToResponse(updatedInKindAid);
     }
 
+    @Auditable(actionType = "Sildi", targetEntity = "Ayni Yardım")
     public InKindAidResponse deleteInKindAidById(Long id) {
         InKindAid deletedInKindAid = inKindAidRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Ayni yardım bulunamadı!!!" + id));

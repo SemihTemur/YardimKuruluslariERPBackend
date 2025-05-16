@@ -14,6 +14,8 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     Optional<Category> findByItemName(String itemName);
 
+    Boolean existsByItemNameAndAndUnit(String itemName, String unit);
+
     @Query("SELECT new com.semih.dto.response.CategoryUnitItemResponse(c.itemName,c.unit) from Category c")
     List<CategoryUnitItemResponse> getCategoryUnitItemList();
 

@@ -14,6 +14,12 @@ public interface DonorRepository extends JpaRepository<Donor, Long> {
 
     Optional<Donor> findByFirstNameAndLastName(String donorName, String lastName);
 
+    Boolean existsByFirstNameAndLastName(String donorName, String lastName);
+
+    Boolean existsByEmail(String email);
+
+    Boolean existsByPhoneNumber(String phoneNumber);
+
     @Query("SELECT new com.semih.dto.response.DonorNameResponse(d.firstName, d.lastName) FROM Donor d")
     List<DonorNameResponse> getDonorNameAndSurnameList();
 

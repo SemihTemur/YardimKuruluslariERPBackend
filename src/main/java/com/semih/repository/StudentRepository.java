@@ -14,6 +14,14 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
     Optional<Student> findByNameAndSurname(String name, String surname);
 
+    Boolean existsByNameAndSurname(String name, String surname);
+
+    Boolean existsByTckn(String tckn);
+
+    Boolean existsByPhoneNumber(String phoneNumber);
+
+    Boolean existsByEmail(String email);
+
     @Query("Select new com.semih.dto.response.StudentNameResponse(s.name,s.surname) from Student s")
     List<StudentNameResponse> getStudentNameAndSurnameList();
 

@@ -5,8 +5,10 @@ import com.semih.dto.response.AddressResponse;
 import com.semih.dto.response.BaseResponse;
 import com.semih.dto.response.DonorNameResponse;
 import com.semih.dto.response.DonorResponse;
+import com.semih.exception.ConflictException;
 import com.semih.exception.NotFoundException;
 import com.semih.model.Address;
+import com.semih.model.Auditable;
 import com.semih.model.Donor;
 import com.semih.repository.DonorRepository;
 import jakarta.transaction.Transactional;
@@ -60,10 +62,27 @@ public class DonorService {
         );
     }
 
+    private void validateUniqueness(DonorRequest donorRequest) {
+        if (donorRepository.existsByFirstNameAndLastName(donorRequest.firstName(), donorRequest.lastName())) {
+            throw new ConflictException("Bağışçı adı ve soyadı mevcut!!!");
+        }
+
+        if (donorRepository.existsByEmail(donorRequest.email())) {
+            throw new ConflictException("Email mevcut!!!");
+        }
+
+        if (donorRepository.existsByPhoneNumber(donorRequest.phoneNumber())) {
+            throw new ConflictException("Telefon numarası mevcut!!!");
+        }
+    }
+
+    @Auditable(actionType = "Ekledi", targetEntity = "Bağışçı")
     public DonorResponse saveDonor(DonorRequest donorRequest) {
+        validateUniqueness(donorRequest);
         Donor savedDonor = donorRepository.save(mapToEntity(donorRequest));
         return mapToResponse(savedDonor);
     }
+
 
     // Get
     public List<DonorResponse> getDonorList() {
@@ -90,10 +109,13 @@ public class DonorService {
                 .orElseThrow(() -> new NotFoundException("Bağışçı bulunamadı!!!" + firstName + lastName));
     }
 
-    //update
+    @Auditable(actionType = "Güncelledi", targetEntity = "Bağışçı")
     public DonorResponse updateDonorById(Long id, DonorRequest donorRequest) {
         Donor existingDonor = donorRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Bağışçı bulunamadı!!!" + id));
+
+        validateUniqueness(donorRequest);
+
         Donor updatedDonor = mapToEntity(donorRequest);
         updatedDonor.setId(existingDonor.getId());
         updatedDonor.setCreatedDate(existingDonor.getCreatedDate());
@@ -101,7 +123,8 @@ public class DonorService {
         return mapToResponse(updatedDonor);
     }
 
-    // Delete
+
+    @Auditable(actionType = "Sildi", targetEntity = "Bağışçı")
     @Transactional
     public DonorResponse deleteDonorById(Long id) {
         Donor deletedDonor = donorRepository.findById(id)
@@ -110,6 +133,7 @@ public class DonorService {
         return mapToResponse(deletedDonor);
     }
 
+    @Auditable(actionType = "Sildi", targetEntity = "Bağışçı")
     public List<DonorResponse> deleteAllDonor() {
         List<DonorResponse> donorResponseList = getDonorList();
         donorRepository.deleteAll();

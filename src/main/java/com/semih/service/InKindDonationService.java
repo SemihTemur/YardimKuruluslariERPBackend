@@ -6,6 +6,7 @@ import com.semih.dto.response.CategoryUnitItemResponse;
 import com.semih.dto.response.InKindDonationResponse;
 import com.semih.exception.NegativeStockException;
 import com.semih.exception.NotFoundException;
+import com.semih.model.Auditable;
 import com.semih.model.Category;
 import com.semih.model.InKindDonation;
 import com.semih.model.Inventory;
@@ -66,6 +67,7 @@ public class InKindDonationService {
         );
     }
 
+    @Auditable(actionType = "Ekledi", targetEntity = "Ayni Bağış")
     public InKindDonationResponse saveInKindDonation(InKindDonationRequest inKindDonationRequest) {
         InKindDonation inKindDonation = mapToEntity(inKindDonationRequest);
         Inventory inventory = mapToInventory(inKindDonation);
@@ -81,6 +83,7 @@ public class InKindDonationService {
                 .collect(Collectors.toList());
     }
 
+    @Auditable(actionType = "Güncelledi", targetEntity = "Ayni Bağış")
     public InKindDonationResponse updateInKindDonationById(Long id, InKindDonationRequest inKindDonationRequest) {
         InKindDonation savedInKindDonation = inKindDonationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Ayni bağış bulunamadı!!!"));
@@ -135,6 +138,8 @@ public class InKindDonationService {
         return mapToResponse(updatedInKindDonation);
     }
 
+
+    @Auditable(actionType = "Sildi", targetEntity = "Ayni Bağış")
     @Transactional
     public InKindDonationResponse deleteInKindDonationById(Long id) {
         InKindDonation deletedInKindDonation = inKindDonationRepository.findById(id)

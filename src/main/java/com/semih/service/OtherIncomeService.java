@@ -5,6 +5,7 @@ import com.semih.dto.response.BaseResponse;
 import com.semih.dto.response.OtherIncomeResponse;
 import com.semih.exception.InsufficientBalanceException;
 import com.semih.exception.NotFoundException;
+import com.semih.model.Auditable;
 import com.semih.model.OtherIncome;
 import com.semih.repository.OtherIncomeRepository;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,7 @@ public class OtherIncomeService {
         );
     }
 
+    @Auditable(actionType = "Ekledi", targetEntity = "Diğer Gelirler")
     public OtherIncomeResponse saveOtherIncome(OtherIncomeRequest otherIncomeRequest) {
         OtherIncome savedOtherIncome = mapToEntity(otherIncomeRequest);
 
@@ -69,6 +71,7 @@ public class OtherIncomeService {
                 .collect(Collectors.toList());
     }
 
+    @Auditable(actionType = "Güncelledi", targetEntity = "Diğer Gelirler")
     public OtherIncomeResponse updateOtherIncomeById(Long id, OtherIncomeRequest otherIncomeRequest) {
         OtherIncome otherIncome = otherIncomeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Diğer gelir bulunamadı!!!" + id));
@@ -104,6 +107,7 @@ public class OtherIncomeService {
         return mapToResponse(updatedOtherIncome);
     }
 
+    @Auditable(actionType = "Sildi", targetEntity = "Diğer Gelirler")
     public OtherIncomeResponse deleteOtherIncomeById(Long id) {
         // silmeden önce kasadan azaltma kontrolu
         OtherIncome deletedOtherIncome = otherIncomeRepository.findById(id)

@@ -5,6 +5,7 @@ import com.semih.dto.response.BaseResponse;
 import com.semih.dto.response.ScholarshipExpenseResponse;
 import com.semih.dto.response.ScholarshipResponse;
 import com.semih.exception.InsufficientBalanceException;
+import com.semih.model.Auditable;
 import com.semih.model.Scholarship;
 import com.semih.repository.ScholarshipRepository;
 import com.semih.utils.HelperUtils;
@@ -76,6 +77,7 @@ public class ScholarshipService {
         );
     }
 
+    @Auditable(actionType = "Ekledi", targetEntity = "Burs")
     public ScholarshipResponse saveScholarship(ScholarshipRequest scholarshipRequest) {
         // Öncelikle gelen değerin içeriklerini alıyorum.
         BigDecimal scholarshipAmount = scholarshipRequest.scholarshipAmount();
@@ -133,6 +135,7 @@ public class ScholarshipService {
                 .collect(Collectors.toList());
     }
 
+    @Auditable(actionType = "Güncelledi", targetEntity = "Burs")
     public ScholarshipResponse updateScholarshipById(Long id, ScholarshipRequest scholarshipRequest) {
         // Güncellenecek olan nesneyi ve toplam bağışlanan parayı alıyorum.
         Scholarship scholarship = scholarshipRepository.findById(id)
@@ -188,6 +191,7 @@ public class ScholarshipService {
         return mapToResponse(updatedScholarship);
     }
 
+    @Auditable(actionType = "Sildi", targetEntity = "Burs")
     public ScholarshipResponse deleteScholarshipById(Long id) {
         Scholarship deletedScholarship = scholarshipRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Burs bulunamadı!!!" + id));

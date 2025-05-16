@@ -6,6 +6,7 @@ import com.semih.dto.response.RestResponse;
 import com.semih.service.CashDonationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,24 +21,27 @@ public class CashDonationController {
         this.cashDonationService = cashDonationService;
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('CASHDONATION_SAVE')")
     @PostMapping("/saveCashDonation")
     public ResponseEntity<RestResponse<CashDonationResponse>> saveCashDonation(@RequestBody CashDonationRequest cashDonationRequest) {
         CashDonationResponse savedCashDonationResponse = cashDonationService.saveCashDonation(cashDonationRequest);
         return new ResponseEntity<>(RestResponse.of(savedCashDonationResponse), HttpStatus.OK);
     }
-
+    
     @GetMapping("/getCashDonationList")
     public ResponseEntity<RestResponse<List<CashDonationResponse>>> getCashDonationList() {
         List<CashDonationResponse> cashDonationResponseList = cashDonationService.getCashDonationList();
         return new ResponseEntity<>(RestResponse.of(cashDonationResponseList), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('CASHDONATION_UPDATE')")
     @PutMapping("/updateCashDonationById/{id}")
     public ResponseEntity<RestResponse<CashDonationResponse>> updateCashDonationById(@PathVariable Long id, @RequestBody CashDonationRequest cashDonationRequest) {
         CashDonationResponse updatedCashDonationResponse = cashDonationService.updateCashDonationById(id, cashDonationRequest);
         return new ResponseEntity<>(RestResponse.of(updatedCashDonationResponse), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('CASHDONATION_DELETE')")
     @DeleteMapping("/deleteCashDonationById/{id}")
     public ResponseEntity<RestResponse<CashDonationResponse>> deleteCashDonationById(@PathVariable Long id) {
         CashDonationResponse deletedCashDonationResponse = cashDonationService.deleteCashDonationById(id);

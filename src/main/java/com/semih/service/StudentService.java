@@ -5,8 +5,10 @@ import com.semih.dto.response.AddressResponse;
 import com.semih.dto.response.BaseResponse;
 import com.semih.dto.response.StudentNameResponse;
 import com.semih.dto.response.StudentResponse;
+import com.semih.exception.ConflictException;
 import com.semih.exception.NotFoundException;
 import com.semih.model.Address;
+import com.semih.model.Auditable;
 import com.semih.model.Student;
 import com.semih.repository.StudentRepository;
 import jakarta.transaction.Transactional;
@@ -66,7 +68,25 @@ public class StudentService {
         );
     }
 
-    // Post
+    private void validateUniqueness(StudentRequest studentRequest) {
+        if (studentRepository.existsByNameAndSurname(studentRequest.name(), studentRequest.surname())) {
+            throw new ConflictException("Bu öğrenci adı ve soyadı mevcut!!!");
+        }
+
+        if (studentRepository.existsByTckn(studentRequest.tckn())) {
+            throw new ConflictException("Bu TC mevcut!!!");
+        }
+
+        if (studentRepository.existsByPhoneNumber(studentRequest.phoneNumber())) {
+            throw new ConflictException("Bu telefon numarası mevcut!!!");
+        }
+
+        if (studentRepository.existsByEmail(studentRequest.email())) {
+            throw new ConflictException("Bu email mevcut!!!");
+        }
+    }
+
+    @Auditable(actionType = "Ekledi", targetEntity = "Student")
     public StudentResponse saveStudent(StudentRequest studentRequest) {
         Student savedStudent = studentRepository.save(mapToEntity(studentRequest));
         return mapToResponse(savedStudent);
@@ -97,17 +117,18 @@ public class StudentService {
                 .orElseThrow(() -> new NotFoundException("Öğrenci bulunamadı!!!" + name + surname));
     }
 
-    //update
+    @Auditable(actionType = "Güncelledi", targetEntity = "Student")
     public StudentResponse updateStudentById(Long id, StudentRequest studentRequest) {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Öğrenci bulunamadı!!!" + id));
+        validateUniqueness(studentRequest);
         Student updatedStudent = mapToEntity(studentRequest);
         updatedStudent.setId(id);
         updatedStudent.setCreatedDate(student.getCreatedDate());
         return mapToResponse(studentRepository.save(updatedStudent));
     }
 
-    // Delete
+    @Auditable(actionType = "Sildi", targetEntity = "Student")
     @Transactional
     public StudentResponse deleteStudentById(Long id) {
         Student deletedStudent = studentRepository.findById(id)
@@ -116,6 +137,7 @@ public class StudentService {
         return mapToResponse(deletedStudent);
     }
 
+    @Auditable(actionType = "Sildi", targetEntity = "Student")
     public List<StudentResponse> deleteAllStudents() {
         List<StudentResponse> deletedStudentResponseList = getStudentList();
         studentRepository.deleteAll();
