@@ -2,13 +2,16 @@ package com.semih.controller;
 
 import com.semih.dto.request.CashDonationRequest;
 import com.semih.dto.response.CashDonationResponse;
+import com.semih.dto.response.MonthlyDonationStatsResponse;
 import com.semih.dto.response.RestResponse;
+import com.semih.dto.response.TopDonorResponse;
 import com.semih.service.CashDonationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -27,11 +30,29 @@ public class CashDonationController {
         CashDonationResponse savedCashDonationResponse = cashDonationService.saveCashDonation(cashDonationRequest);
         return new ResponseEntity<>(RestResponse.of(savedCashDonationResponse), HttpStatus.OK);
     }
-    
+
     @GetMapping("/getCashDonationList")
     public ResponseEntity<RestResponse<List<CashDonationResponse>>> getCashDonationList() {
         List<CashDonationResponse> cashDonationResponseList = cashDonationService.getCashDonationList();
         return new ResponseEntity<>(RestResponse.of(cashDonationResponseList), HttpStatus.OK);
+    }
+
+    @GetMapping("/getCashDonationAmounts")
+    public ResponseEntity<RestResponse<BigDecimal>> getCashDonationAmounts() {
+        BigDecimal cashDonationAmounts = cashDonationService.getCashDonationAmounts();
+        return new ResponseEntity<>(RestResponse.of(cashDonationAmounts), HttpStatus.OK);
+    }
+
+    @GetMapping("/getTopDonors")
+    public ResponseEntity<RestResponse<List<TopDonorResponse>>> getTopDonors() {
+        List<TopDonorResponse> topDonorResponseList = cashDonationService.getTopDonorResponse();
+        return new ResponseEntity<>(RestResponse.of(topDonorResponseList), HttpStatus.OK);
+    }
+
+    @GetMapping("/getMonthlyDonationStats")
+    public ResponseEntity<RestResponse<List<MonthlyDonationStatsResponse>>> getMonthlyDonationStatsResponse() {
+        List<MonthlyDonationStatsResponse> monthlyDonationStatsResponseList = cashDonationService.getMonthlyDonationStatsResponse();
+        return new ResponseEntity<>(RestResponse.of(monthlyDonationStatsResponseList), HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('CASHDONATION_UPDATE')")

@@ -109,12 +109,16 @@ public class FamilyService {
         return familyRepository.getFamilyNames();
     }
 
+    public Long getFamilyCount() {
+        return familyRepository.count();
+    }
+
     @Auditable(actionType = "Güncelledi", targetEntity = "Aile")
     public FamilyResponse updateFamilyById(Long id, FamilyRequest familyRequest) {
         Family existingFamily = familyRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Aile bulunamadı!!!" + id));
 
-        validateUniqueness(familyRequest);
+//        validateUniqueness(familyRequest);
 
         Family updatedFamily = mapToEntity(familyRequest);
         updatedFamily.setId(id);

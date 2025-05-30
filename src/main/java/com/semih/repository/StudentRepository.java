@@ -25,4 +25,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     @Query("Select new com.semih.dto.response.StudentNameResponse(s.name,s.surname) from Student s")
     List<StudentNameResponse> getStudentNameAndSurnameList();
 
+    @Query("Select count(s) from Student s")
+    Long getStudentCount();
+
 }

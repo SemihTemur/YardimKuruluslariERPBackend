@@ -3,11 +3,14 @@ package com.semih.service;
 import com.semih.dto.request.CashDonationRequest;
 import com.semih.dto.response.BaseResponse;
 import com.semih.dto.response.CashDonationResponse;
+import com.semih.dto.response.MonthlyDonationStatsResponse;
+import com.semih.dto.response.TopDonorResponse;
 import com.semih.exception.InsufficientBalanceException;
 import com.semih.exception.NotFoundException;
 import com.semih.model.Auditable;
 import com.semih.model.CashDonation;
 import com.semih.repository.CashDonationRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -73,6 +76,29 @@ public class CashDonationService {
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
+
+    public BigDecimal getCashDonationAmounts() {
+        return cashDonationRepository.getCashDonationAmounts();
+    }
+
+    public List<TopDonorResponse> getTopDonorResponse() {
+        return cashDonationRepository.getTopDonors(PageRequest.of(0, 3));
+    }
+
+    public List<MonthlyDonationStatsResponse> getMonthlyDonationStatsResponse() {
+        List<Object[]> result = cashDonationRepository.getTopMonthlyDonors();
+        List<MonthlyDonationStatsResponse> response = result.stream()
+                .map(row -> new MonthlyDonationStatsResponse(
+                        (String) row[0],
+                        (String) row[1],
+                        (String) row[2],
+                        (BigDecimal) row[3],
+                        (BigDecimal) row[4]
+                ))
+                .collect(Collectors.toList());
+        return response;
+    }
+
 
     @Auditable(actionType = "Güncelledi", targetEntity = "Nakdi Bağış")
     public CashDonationResponse updateCashDonationById(Long id, CashDonationRequest cashDonationRequest) {

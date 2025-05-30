@@ -49,6 +49,12 @@ public class StudentController {
         return new ResponseEntity<>(RestResponse.of(getStudentResponse), HttpStatus.OK);
     }
 
+    @GetMapping("/getStudentCount")
+    public ResponseEntity<RestResponse<Long>> getStudentCount() {
+        Long studentCount = studentService.getStudentCount();
+        return new ResponseEntity<>(RestResponse.of(studentCount), HttpStatus.OK);
+    }
+
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('STUDENT_UPDATE')")
     @PutMapping(path = "updateStudentById/{id}")
     public ResponseEntity<RestResponse<StudentResponse>> updateStudentById(@PathVariable Long id, @RequestBody StudentRequest studentRequest) {
@@ -69,5 +75,6 @@ public class StudentController {
         List<StudentResponse> deleteStudentResponseList = studentService.deleteAllStudents();
         return new ResponseEntity<>(RestResponse.of(deleteStudentResponseList), HttpStatus.OK);
     }
+
 
 }

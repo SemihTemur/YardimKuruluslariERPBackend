@@ -23,5 +23,7 @@ public interface DonorRepository extends JpaRepository<Donor, Long> {
     @Query("SELECT new com.semih.dto.response.DonorNameResponse(d.firstName, d.lastName) FROM Donor d")
     List<DonorNameResponse> getDonorNameAndSurnameList();
 
+//    @Query("Select count(d) from Donor d")
+//    Long getDonorCount();
 
 }

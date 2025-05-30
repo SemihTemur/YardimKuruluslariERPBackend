@@ -83,7 +83,6 @@ public class DonorService {
         return mapToResponse(savedDonor);
     }
 
-
     // Get
     public List<DonorResponse> getDonorList() {
         List<Donor> donorList = donorRepository.findAll();
@@ -109,12 +108,15 @@ public class DonorService {
                 .orElseThrow(() -> new NotFoundException("Bağışçı bulunamadı!!!" + firstName + lastName));
     }
 
+    public Long getDonorCount() {
+        return donorRepository.count();
+    }
+
     @Auditable(actionType = "Güncelledi", targetEntity = "Bağışçı")
     public DonorResponse updateDonorById(Long id, DonorRequest donorRequest) {
         Donor existingDonor = donorRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Bağışçı bulunamadı!!!" + id));
 
-        validateUniqueness(donorRequest);
 
         Donor updatedDonor = mapToEntity(donorRequest);
         updatedDonor.setId(existingDonor.getId());

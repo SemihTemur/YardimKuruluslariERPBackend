@@ -49,6 +49,12 @@ public class DonorController {
         return donorService.getDonorNameAndSurnameList();
     }
 
+    @GetMapping("/getDonorCount")
+    public ResponseEntity<RestResponse<Long>> getStudentCount() {
+        Long count = donorService.getDonorCount();
+        return new ResponseEntity<>(RestResponse.of(count), HttpStatus.OK);
+    }
+
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('DONOR_UPDATE')")
     @PutMapping(path = "/updateDonorById/{id}")
     public ResponseEntity<RestResponse<DonorResponse>> updateDonorById(@PathVariable Long id, @RequestBody DonorRequest donorRequest) {

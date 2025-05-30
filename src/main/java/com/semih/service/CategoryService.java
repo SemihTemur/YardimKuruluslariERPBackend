@@ -84,7 +84,7 @@ public class CategoryService {
         Category existingCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Kategori bulunamadı!!!" + id));
 
-        validateUniqueness(categoryRequest);
+//        validateUniqueness(categoryRequest);
         // 2. Gelen DTO'yu Entity'ye dönüştür
         Category updatedCategory = mapToEntity(categoryRequest);
 

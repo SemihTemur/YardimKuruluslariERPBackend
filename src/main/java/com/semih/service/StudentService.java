@@ -112,6 +112,10 @@ public class StudentService {
         return mapToResponse(student);
     }
 
+    public Long getStudentCount() {
+        return studentRepository.count();
+    }
+
     public Student getStudentByNameAndSurname(String name, String surname) {
         return studentRepository.findByNameAndSurname(name, surname)
                 .orElseThrow(() -> new NotFoundException("Öğrenci bulunamadı!!!" + name + surname));
@@ -121,7 +125,7 @@ public class StudentService {
     public StudentResponse updateStudentById(Long id, StudentRequest studentRequest) {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Öğrenci bulunamadı!!!" + id));
-        validateUniqueness(studentRequest);
+//        validateUniqueness(studentRequest);
         Student updatedStudent = mapToEntity(studentRequest);
         updatedStudent.setId(id);
         updatedStudent.setCreatedDate(student.getCreatedDate());

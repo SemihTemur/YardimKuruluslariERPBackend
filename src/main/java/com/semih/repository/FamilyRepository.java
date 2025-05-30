@@ -22,4 +22,7 @@ public interface FamilyRepository extends JpaRepository<Family, Long> {
 
     @Query("Select new com.semih.dto.response.FamilyNameResponse(f.familyName) from Family f")
     List<FamilyNameResponse> getFamilyNames();
+
+//    @Query("Select count(f) from Family f")
+//    Long getFamilyCount();
 }

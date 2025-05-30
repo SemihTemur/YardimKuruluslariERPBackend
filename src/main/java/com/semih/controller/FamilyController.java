@@ -49,6 +49,12 @@ public class FamilyController {
         return familyService.getFamilyNames();
     }
 
+    @GetMapping("/getFamilyCount")
+    public ResponseEntity<RestResponse<Long>> getFamilyCount() {
+        Long count = familyService.getFamilyCount();
+        return new ResponseEntity<>(RestResponse.of(count), HttpStatus.OK);
+    }
+
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasAuthority('FAMILY_UPDATE')")
     @PutMapping(path = "updateFamilyById/{id}")
     public ResponseEntity<RestResponse<FamilyResponse>> updateFamilyById(@PathVariable Long id, @RequestBody FamilyRequest FamilyRequest) {
